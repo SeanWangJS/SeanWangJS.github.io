@@ -1,6 +1,9 @@
 ---
 layout: default
 title: Fenrier Lab
+map:
+  - Svm equation: A
+  - another: B
 ---
 
 <h2>{{ page.title }}</h2>
@@ -10,5 +13,6 @@ title: Fenrier Lab
     <li>
       {{ post.date | date_to_string }}  <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
     </li>
+	<p>{{page.map.another}}</p>
   {% endfor %}
 </ul>
