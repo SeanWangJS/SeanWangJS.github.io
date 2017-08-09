@@ -26,10 +26,10 @@ public class hashmap<K, V>{
          int index = hash(key);
          table[index] = new node(key, value);
     }
-    static class Node<K, V> {
+    static class node<K, V> {
          K key;
          V value;
-         public Node(K key, V value) {
+         node(K key, V value) {
              this.key = key;
              this.value = value;
          }
@@ -37,7 +37,7 @@ public class hashmap<K, V>{
 }
 ```
 
-这里的hash函数，接受key，然后返回对应的索引，并且不同的key对应不同的索引，否则数据就被后来者覆盖了，一种很自然的想法是利用Java对象自带的哈希码方法，即hashCode()，来实现这一功能。但问题在于hashCode()计算的值实在太大，总是开辟这样大的数组空间显得不现实。于是HashMap的设计者就想到一个简单粗暴的方法，使用不那么大的数组容量n，然后将哈希码与n - 1作&运算。
+hashmap用内部类 node 来管理键值对，然后使用 node 数组 table 作为键值对容器，之所以用“节点”这个词，是因为在必要时要将这个块扩展为链表或者树，这将在后面讨论。这里的hash函数，接受key，然后返回对应的索引，并且不同的key对应不同的索引，否则数据就被后来者覆盖了，一种很自然的想法是利用Java对象自带的哈希码方法，即hashCode()，来实现这一功能。但问题在于hashCode()计算的值实在太大，总是开辟这样大的数组空间显得不现实。于是HashMap的设计者就想到一个简单粗暴的方法，使用不那么大的数组容量n，然后将哈希码与n - 1作&运算。
 ```java
 h = key.hashCode();
 index = h & (n - 1);
@@ -60,6 +60,21 @@ index = h & (n - 1);
 >There is a tradeoff between speed, utility, and quality of bit-spreading. Because many common sets of hashes are already reasonably distributed (so don't benefit from spreading), and because we use trees to handle large sets of collisions in bins, we just XOR some shifted bits in the cheapest possible way to reduce systematic lossage, as well as to incorporate impact of the highest bits that would otherwise never be used in index calculations because of table bounds.
 
 因为现有的哈希分布已经很理想了，再修正哈希码的收效并不大，所以，异或运算是一个权衡了速度、效用和质量后的决定。而对于那些已经发生碰撞的数据，则使用树来存储。
+
+另外，为了不重复调用 hash 函数，可以在 node 类中声明一个字段用于存储相应 key 的 hash 值，将 node 类修改如下
+```java
+static class node<K, V> {
+	final int hash;
+    final K key;
+    V value;
+    node(int hash, K key, V value) {
+		this.hash = hash;
+        this.key = key;
+        this.value = value;
+    }
+}
+```
+将 key 和 hash 字段声明为 final 是为了保持这些量的不变性。
 
 ### 存入数据
 
@@ -105,7 +120,7 @@ public hashmap(int initialCapacity, float loadFactor) {
 
 ![](/resources/2017-08-01-hashmap-source-code-01/put-val.png)
 
-putVal 方法接受前面计算的hash值，以及一组键值对，首先判断容器数组是否为空，如果是，则先调用 resize 方法初始化容器数组。如果不为空，则判断对应索引上是否有值，如果没有，则将数据放到该位置，如果有，则使用树来存储相同索引数据，现在先不管这种情况。这里值得注意的是 resize 方法
+putVal 方法接受前面计算的 hash 值，以及一组键值对，首先判断容器数组是否为空，如果是，则先调用 resize 方法初始化容器数组。如果不为空，则判断对应索引上是否有值，如果没有，则将数据放到该位置，如果有，则使用链表或者二叉树来存储相同索引数据，现在先不管这种情况。这里值得注意的是 resize 方法
 
 ![](/resources/2017-08-01-hashmap-source-code-01/resize.png)
 
@@ -124,6 +139,12 @@ hash = 0000abcd
 indexOld  = hash & (n1 - 1) = 0000abcd & 00001111 = 0000a'b'c'd'
 
 indexNew = hash & (n - 1)   = 0000abcd & 00011111 = 0000a'b'c'd'
+
+也就是说 indexOld = indexNew ，而如果标志位为 1，即 hash = 0001abcd ， 那么
+
+indexOld  = hash & (n1 - 1) = 0001abcd & 00001111 = 0000a'b'c'd'
+
+indexNew = hash & (n - 1)   = 0001abcd & 00011111 = 0001a'b'c'd'
 
 而 n1 恰好等于 00010000，于是 indexNew = n1 + indexOld，所以通过上面两种情况的分析，在不重新计算 hash 的情况下确定数据索引，这是一种相当精妙的设定。基于以上描述，可以实现简化的 resize 方法
 
@@ -158,15 +179,15 @@ public void resize() {
 
 根据前面对 putVal 的分析，可以写出简化的 put 方法
 ```java
-	public hashmap put(K key, V value) {
-		if(table.length == 0 || size >= (int) (table.length * loadFactor)) {
-            resize();
-        }
-        int h = hash(key);
-        table[h & (table.length - 1)] = new node<>(h, key, value);
-        size++;
-        return this;
+public hashmap put(K key, V value) {
+	if(table.length == 0 || size >= (int) (table.length * loadFactor)) {
+        resize();
     }
+    int hash = hash(key);
+    table[hash & (table.length - 1)] = new node<>(hash, key, value);
+    size++;
+    return this;
+}
 ```
 
 注意上面没有对两个数据有相同hash值的情况进行处理，而是直接覆盖，以后将会讨论这个问题。
@@ -180,6 +201,78 @@ public V get(K key) {
     return table[index].value;
 }
 ```
-不知不觉已经写了这么多了，本来想一篇写完的，但是感觉后面还有相当多的内容，所以，前面的就作为第一部分吧。大体上分析了HashMap的构造函数，tableSizeFor方法，put方法，resize方法以及 get 方法。并且实现了非常基础的hashmap，接下来将考虑哈希碰撞后的处理方法，即使用链表或者树结构来存储同索引数据。
+
+### 遇到相同 hash 情况
+
+如果向哈希表中put键值对的时候，发现插入位置还有其他的数据，那么就需要进一步处理，先看看 HashMap 类的 putVal 函数是怎么做的
+
+![](/resources/2017-08-01-hashmap-source-code-01/put-val2.png)
+
+上面代码的意思是：
+
+1. 如果新插入数据的 hash 值等于已经存在的数据 p 的 hash 值，并且两者的 key 相同，这种情况其实是在更新键值，可以直接覆盖旧数据。
+2. 如果已有数据 p 是一个树节点，那么新数据就需要插入到树里面。
+3. 最后一种情况意味着 p 是一个链表节点，如果发现新数据的 key 其实就是链表中某个节点的 key，则用新的value覆盖，如果一直没发现同 key 数据，则需要将新数据插入到链表末尾。binCount 的终值记录了链表长度，如果发现链表长度超过了阈值 TREEIFY_THERSHOLD ，那么就把链表转换成二叉树（确切的说是一棵红黑树）。
+
+为了减少复杂性，现在先不考虑二叉树的存储结构，当发现索引位已有数据时，直接用链表来存储新数据。当然在此之前要先为 node 类添加一个 next 字段，用于存储后续节点引用。
+
+```java
+static class node<K, V>{
+
+	//code
+	
+	node<K, V> next;	
+	
+	//code
+}
+
+```
+
+然后是依照上述规则更新后的 put 方法，由于不用考虑将链表转换成树，所以在遍历链表时没有记录其大小。
+
+```java
+public hashmap put(K key, V value) {
+        if(table.length == 0 || size >= (int) (table.length * loadFactor)) {
+            resize();
+        }
+        int hash = hash(key);
+        int index = hash & (table.length - 1);
+        node<K, V> p = table[index];
+        K k;
+        if(p != null) {
+            //如果新旧数据的键相同，则只需更新 value
+            if(p.hash == hash && ((k = p.key) == key || (key != null && key.equals(k)))) {
+                p.value = value;
+            }else {
+                node<K, V> e;
+                //遍历节点p开头的链表，如果在链表中发现key，则对value进行更新。否则将新的键值对插入链表末尾
+                while(true){
+                    e = p.next;
+                    if(e == null) {
+                        p.next = new node<>(hash, key, value);
+                        size++;
+                        break;
+                    }
+                    if(e.hash == hash && ((k = e.key) == key || key != null && key.equals(k))) {
+                        e.value = value;
+                        break;
+                    }
+                    p = e;
+                }
+            }
+        }else{
+            table[index] = new node<>(hash, key, value);
+            size++;
+        }
+		if(size >= table.length * loadFactor) {
+            resize();
+        }
+        return this;
+    }
+```
+
+### 小结
+
+以上，一个具有基本功能的哈希表被建立起来了，大体上分析了HashMap的构造函数，tableSizeFor方法，put方法，resize方法以及 get 方法。这只是HashMap中非常基础的部分，当然也是核心的内容，其他的代码基本上就是在维护这种结构，或者是提供一些友好的接口，方便开发人员的操作。
 
 **引用声明**：本文主要参考了YiKun的 [Java HashMap 工作原理及实现](http://yikun.github.io/2015/04/01/Java-HashMap%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/)，以及Java HashMap类源码。
