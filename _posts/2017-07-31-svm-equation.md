@@ -3,6 +3,7 @@ layout: default
 ---
 
 ## 支持向量机
+
 在n维空间上定义一个超平面
 
 $$\omega^T x + b = 0$$
