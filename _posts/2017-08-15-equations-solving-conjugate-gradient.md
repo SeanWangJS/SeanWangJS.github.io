@@ -34,7 +34,7 @@ $$
 A e^{(k+1)}\cdot d^{(k)} &= 0\\
 A (e^{(k)} + \alpha^{(k)} d^{(k)}) \cdot d^{(k)} &= 0\\
 \alpha^{(k)} &= \frac{-A e^{(k)} \cdot d^{(k)}}{A d^{(k)}\cdot d^{(k)}}\\
-\alpha^{(k)} &= \frac{r^{(k)} \cdot d^{(k)}}{A d^{(k)}\cdot d^{(k)}}\\
+\alpha^{(k)} &= \frac{r^{(k)} \cdot d^{(k)}}{A d^{(k)}\cdot d^{(k)}}
 \end{aligned}
 $$
 
@@ -143,13 +143,110 @@ $$
 d^{(i)}\cdot r^{(i)} = u_i \cdot r^{(i)}
 $$
 
+### 共轭梯度法
 
+根据公式 
 
+$$
+0 = r^{(i)} \cdot u_j , \quad (if \quad i > j)
+$$
 
+若用 $$r^{(i)}$$ 代替所有 $$u_i$$，那么就有 
 
+$$
+0 = r^{(i)} \cdot r^{(j)}  , \quad (if \quad i > j)
+$$
 
+也就是说，第 i 步迭代的 $$r^{(i)}$$ 正交于之前的所有 $$r^{(j)}, j < i$$，这就说明向量组 $$r^{(i)}, i = 0,1,,,n-1$$ 能张成空间，符合作为基向量的条件。
 
+根据前面的结论 
 
+$$
+\beta_{ij} = -\frac{A d^{(j)}\cdot u_i}{A d^{(j)}\cdot d^{(j)}} = -\frac{A d^{(j)}\cdot r^{(i)}}{A d^{(j)}\cdot d^{(j)}}
+$$
+
+并且
+
+$$
+\begin{aligned}
+r^{(j+1)} &= -A e^{(j+1)} \\
+{}&=-A(e^{(j)} + \alpha^{(j)} d^{(j)})\\
+{}&=-A e^{(j)} - \alpha^{(j)} A d^{(j)}\\
+{}&=r^{(j)} - \alpha^{(j)} A d^{(j)}
+\end{aligned}
+$$
+
+上式两边同时点乘 $$r^{(i)}$$
+
+$$
+r^{(j+1)} \cdot r^{(i)} = r^{(j)} \cdot r^{(i)}  -\alpha^{(j)} A d^{(j)}\cdot r^{(i)}
+$$
+
+由于$$r^{(i)}\cdot r^{(j)} = 0, if i \neq j$$ 这里存在3种情况
+1. 当 $$i = j$$ 时，$$0= r^{(j)} \cdot r^{(i)}  -\alpha^{(j)} A d^{(j)}\cdot r^{(i)}$$
+2. 当 $$i = j + 1$$ 时，$$r^{(j+1)} \cdot r^{(i)} = -\alpha^{(j)} A d^{(j)}\cdot r^{(i)}$$
+3. 否则，$$0 = -\alpha^{(j)} A d^{(j)}\cdot r^{(i)}$$
+
+于是有
+
+$$
+A d^{(j)}\cdot r^{(i)} = \begin{cases} 
+\frac 1 {\alpha^{(j)}} r^{(j)}\cdot r^{(i)} \quad (i = j)\\
+-\frac 1 {\alpha^{(j)}} r^{(j+1)}\cdot r^{(i)} \quad (i = j+1)\\
+0 \quad other
+\end{cases}
+$$
+
+由共轭格拉姆施密特正交化公式
+
+$$
+d^{(i)} = u_i + \sum \beta_{ik} d^{(k)}
+$$
+
+可以发现，$$\beta_{ik}$$ 的第二个指标永远不会大于第一个指标，也就是说 $$\beta_{ij}$$ 中 $$j < i$$ 恒成立。这就意味着前面分割的三种情况只剩下两种 $$i = j+ 1$$ or $$i >j+1$$，于是
+
+$$
+\beta_{ij} = -\frac{A d^{(j)}\cdot r^{(i)}} {A d^{(j)}\cdot d^{(j)}} = \begin{cases}
+\frac{r^{(j+1)}\cdot r^{(i)}}{\alpha^{(j)} A d^{(j)}\cdot d^{(j)}} \quad (i = j+1)\\
+0 \quad (i > j+ 1)
+\end{cases}
+$$
+
+对于 $$i = j+ 1$$ 这种情况
+
+$$
+\beta_{i, i-1} = \frac{r^{(i)}\cdot r^{(i)}} {\alpha^{(i-1)} A d^{(i-1)} \cdot d^{(i-1)}}
+$$
+
+将最开始推导的 
+
+$$
+\alpha^{(i-1)} = \frac{r^{(i-1)}\cdot d^{(i-1)}}{A d^{(i-1)}\cdot d^{(i-1)}}
+$$
+
+代入 $$\beta_{i, i-1}$$ ，并将其简记为 $$\beta_i$$ 可得
+
+$$
+\beta_i= \frac{r^{(i)}\cdot r^{(i)}} {r^{(i-1)}\cdot r^{(i-1)}}
+$$
+
+综合前面的讨论，最后总结共轭梯度算法的计算过程:
+
+initialize: $$x^{(0)} = 0, r^{(0)} = b- A x^{(0)} = b, d^{(0)} = r^{(0)}$$ 
+
+loop while not converged
+  
+$$
+\begin{aligned}
+\alpha^{(i)} &= \frac{r^{(i)} \cdot d^{(i)}}{A d^{(i)}\cdot d^{(i)}}\\
+x^{(i+1)} &= x^{(i)} + \alpha^{(i)} d^{(i)}\\
+r^{(i+1)} &= r^{(i)} - \alpha^{(i)} A d^{(i)}\\
+\beta_{i+1} &= \frac{r^{(i+1)}\cdot r^{(i+1)}}{r^{(i)}\cdot r^{(i)}}\\
+d^{(i+1)} &= r^{(i+1)} + \beta_{i+1} d^{(i)}
+\end{aligned}
+$$  
+  
+end
 
 
 
