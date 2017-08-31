@@ -239,7 +239,7 @@ $$
 \end{align*}
 $$
 
-### 软间隔分类期
+### 软间隔分类器
 
 ![](/resources/2017-07-31-svm/soft-margin.png)
 
