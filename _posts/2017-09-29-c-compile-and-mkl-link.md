@@ -108,7 +108,7 @@ int add(int a, int b) {
 
 ### 静态链接库
 
-为了解决刚才的问题，我们可以把 add.h 和 add.c 文件一起编译成库文件供使用者调用。库文件又分为静态链接库和动态链接库，这里先演示镜头链接库。
+为了解决刚才的问题，我们可以把 add.h 和 add.c 文件一起编译成库文件供使用者调用。库文件又分为静态链接库和动态链接库，这里先演示静态链接库。
 
 首先在 include 文件夹下编译 add.c
 
@@ -128,7 +128,7 @@ ar r add.lib add.o
 gcc -c main.c -I ".\include"
 ```
 
-最后使用 -L 指定库文件所在目录，以及 -ladd 命令指定我们要调用的函数为 add，如果是其他名字的函数，则使用类似 -l{name} 的这种格式。（这其实就表示指定了具体的实现）
+最后使用 -L 指定库文件所在目录，以及 -ladd 命令指定我们要调用的库为 add，如果是其他名字的函数，则使用类似 -l{name} 的这种格式。（这其实就表示指定了具体的实现）
  
 ```
 gcc main.o -o main -L .\include -ladd
@@ -140,12 +140,23 @@ gcc main.o -o main -L .\include -ladd
 
 英特尔数学核心库(intel MKL) 是一个高性能的矩阵计算库，实现了诸如 Blas 和 Lapack 等线性代数接口。不少软件（例如 matlab,，numpy等等） 如果以 Blas 和 Lapack 等实现作为底层计算工具，将获得极高的运算速度。
 
-为了连接上 MKL ，上面介绍的知识已经足够了。首先是下载并安装 MKL 库
+为了连接上 MKL ，上面介绍的知识已经足够了。首先是下载并安装 MKL 库，为了方便指定路径，设置环境变量 
 
+```
+%MKL_HOME%=G:\Program Files\IntelSWTools\compilers_and_libraries_2018.0.124\windows\mkl
+```
 
+这个路径下包含 include 和 lib 文件夹，提供了编译必要文件。然后下载 [intel官方示例程序](https://software.intel.com/en-us/product-code-samples)，这里以压缩包的 mkl\matrix_multiplication\src 文件夹下的 dgemm_example.c 为例，首先是编译
+
+```
 gcc -c dgemm_example.c -I "%MKL_HOME\include%"
-gcc -o dgemm_example dgemm_example.o -L "%MKL_HOME%\lib\intel64_win" -lmkl_rt
+```
 
+然后链接静态库，生成可执行文件 dgemm_example.exe 。
+
+```
+gcc -o dgemm_example dgemm_example.o -L "%MKL_HOME%\lib\intel64_win" -lmkl_rt
+```
 
 
 
