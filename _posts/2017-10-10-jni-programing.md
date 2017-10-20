@@ -82,7 +82,7 @@ JNIEXPORT void JNICALL Java_Hello_say
 #endif
 ```
 
-最后再编译并生成共享库
+最后再编译并生成动态链接库
 
 ```
 gcc -c Hello.c -I "%JAVA_HOME%\include" -I "%JAVA_HOME%\include\win32"
