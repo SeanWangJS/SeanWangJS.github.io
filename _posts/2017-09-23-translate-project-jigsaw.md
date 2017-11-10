@@ -133,7 +133,38 @@ $ java --module-path mods -m com.greetings/com.greetings.Main
 
 ### <span id = "packaging">打包</span>
 
-到目前为止，模块编译是在文件系统上操作的。为了传输和部署，将模块打包成模块化的 jar 会更方便。
+到目前为止，模块编译是在文件系统上操作的。为了传输和部署，将模块打包成模块化的 jar 会更方便。一个模块化的 Jar 其实就是在普通的 Jar 的顶级目录下加入了 module-info.class 文件。下面的例子在 mlib 目录下创建了 org.astro@1.0.jar 和 com.greetings.jar.
+
+```
+$ mkdir mlib
+
+$ jar --create --file=mlib/org.astro@1.0.jar --module-version=1.0 -C mods/org.astro
+
+$ jar --create --file=mlib/com.greetings.jar --main-class=com.greetings.Main -C mods/com.greetings
+
+$ ls mlib/com
+com.greetings.jar org.astro@1.0.jar
+```
+
+在这个例子中，打包模块 org.astro 指定了其版本号为 1.0。而模块 com.greetings 则指定了其主类为 com.greetings.Main。现在我们可以无需指定主类来运行模块 com.greetings
+
+```
+$ java -p mlib -m com.greetings
+Greetings world!
+```
+
+上面的命令使用 -p 来代替 --module-path 从而缩短命令长度。
+
+jar 工具新增了不少选项 (见 jar -help)，其中之一是打印出模块 Jar 的模块声明。
+
+```
+$ jar --describe-module --file=mlib/org.astro@1.0.jar
+org.astro@1.0 jar:file:///d/mlib/org.astro@1.0.jar/!module-info.class
+exports org.astro
+requires java.base mandated
+```
+
+### <span id = "missing">缺失 requires 或者缺失 exports</span>
 
 
 
