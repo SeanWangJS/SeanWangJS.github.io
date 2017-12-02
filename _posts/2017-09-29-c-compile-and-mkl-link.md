@@ -149,7 +149,7 @@ gcc main.o -o main -L .\include -ladd
 这个路径下包含 include 和 lib 文件夹，提供了编译必要文件。然后下载 [intel官方示例程序](https://software.intel.com/en-us/product-code-samples)，这里以压缩包的 mkl\matrix_multiplication\src 文件夹下的 dgemm_example.c 为例，首先是编译
 
 ```
-gcc -c dgemm_example.c -I "%MKL_HOME\include%"
+gcc -c dgemm_example.c -I "%MKL_HOME%\include"
 ```
 
 然后链接静态库，生成可执行文件 dgemm_example.exe 。
