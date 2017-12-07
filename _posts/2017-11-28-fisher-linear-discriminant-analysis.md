@@ -4,7 +4,7 @@ layout: default
 
 ## Fisher 线性判别分析
 
-设有属于两个类别的 n 个 d 维样本 $$\{x_i\| \, i \in \{1,2,,n\}\}$$，如果它们线性可分，那么一般可以将它们映射到一维空间，并且同样可识别，类似于下图所示的意思
+设有属于两个类别的 n 个 d 维样本 $$\{x_i| \, i \in \{1,2,,n\}\}$$，如果它们线性可分，那么一般可以将它们映射到一维空间，并且同样可识别，类似于下图所示的意思
 
 ![](/resources/2017-11-28-fisher-linear-discriminant-analysis/projection.png)
 
@@ -57,6 +57,7 @@ $$
 $$
 S_i^2 = \sum_{\mathbf{x}\in A_i} (y(\mathbf{x}) - \bar{r}_i)^2,\quad i = 1,2
 $$
+
 其中
 $$
 \bar{r}_i =\frac 1 {n_i} \sum_{\mathbf{x}\in A_i}  y(\mathbf{x})\\
