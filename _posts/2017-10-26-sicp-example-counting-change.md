@@ -56,3 +56,5 @@ $$
 虽然上述的实现确实能解决问题，但是不难发现，该算法过程有太多冗余计算，以 (count-change 6) 为例，下图展示了程序的树形递归计算过程
 
 ![](/resources/2017-10-26-sicp-example-counting-change/img.jpg)
+
+待续

@@ -152,7 +152,7 @@ gcc main.o -o main -L .\include -ladd
 gcc -c dgemm_example.c -I "%MKL_HOME%\include"
 ```
 
-然后链接静态库，生成可执行文件 dgemm_example.exe 。
+然后链接库，生成可执行文件 dgemm_example.exe 。
 
 ```
 gcc -o dgemm_example dgemm_example.o -L "%MKL_HOME%\lib\intel64_win" -lmkl_rt
