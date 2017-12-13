@@ -4,7 +4,7 @@ layout: default
 
 ## Fisher 线性判别分析
 
-设有属于两个类别的 n 个 d 维样本 $$\{x_i\| \, i \in \{1,2,,n\}\}$$，如果它们线性可分，那么一般可以将它们映射到一维空间，并且同样可识别，类似于下图所示的意思
+设有属于两个类别的 n 个 d 维样本 $$\{x_i\mid \, i \in \{1,2,,n\}\}$$，如果它们线性可分，那么一般可以将它们映射到一维空间，并且同样可识别，类似于下图所示的意思
 
 ![](/resources/2017-11-28-fisher-linear-discriminant-analysis/projection.png)
 

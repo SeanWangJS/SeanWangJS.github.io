@@ -67,7 +67,7 @@ $$
 \begin{align*}
   \begin{array} {cc}
     \max\limits_{\omega, b}\quad \frac{\hat\gamma}{||\omega||} \\ 
-    s.t.  \qquad\!y^{(i)} \left(\frac{\omega^T}{||\omega||} x^{(i)} + \frac{b}{||\omega||}\right) \geq \hat\gamma \qquad i = 1,,,m
+    s.t.  \qquad\!y^{(i)} \left(\omega^T x^{(i)} + b\right) \geq \hat\gamma \qquad i = 1,,,m
   \end{array}
 \end{align*}
 $$
@@ -79,8 +79,8 @@ $$
 $$
 \begin{align*}
   \begin{array} {cc}
-    \max\limits_{\omega, b}\quad \frac 1 2 \omega^2 \\ 
-    s.t.  \qquad\!y^{(i)} \left(\frac{\omega^T}{||\omega||} x^{(i)} + \frac{b}{||\omega||}\right) \geq 1 \qquad i = 1,,,m
+    \min\limits_{\omega, b}\quad \frac 1 2 \omega^2 \\ 
+    s.t.  \qquad\!y^{(i)} \left(\omega^T x^{(i)} + b\right) \geq 1 \qquad i = 1,,,m
   \end{array}
 \end{align*}
 $$
