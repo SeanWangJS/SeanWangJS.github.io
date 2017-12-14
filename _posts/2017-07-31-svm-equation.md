@@ -149,6 +149,106 @@ $$
 \max_{\alpha_i \ge 0}\min_{\omega, b}  L(\omega, b, \alpha)
 $$
 
+一般来讲，原问题的解都会大于其对偶问题，但是在 KKT 条件下，两者将等取得相等的解。这个问题的 KKT 条件如下
+
+$$
+\begin{aligned}
+\frac{\partial L}{\partial \omega_i} = 0&, i = 1,,,d \quad(1)\\
+
+	\alpha_i g(x^{(i)}) = 0 &,i = 1,,,n \quad (2)\\
+	g(x^{(i)}) \leq 0&, i = 1,,,n \quad (3) \\
+	\alpha_i \geq 0&, i=1,,,n \quad (4)
+  \end{aligned}
+$$
+
+注意条件 (2)(3) ，如果 $$g(x^{(i)})  < 0$$ 严格成立，那么 $$\alpha_i$$ 必然等于 0。再结合下图
+
+![](../resources/2017-07-31-svm-equation/margin2.png)
+
+可以发现，对于大多数的特征点来讲，$$g(x^{(i)})$$ 都是小于 0 的，也就意味着这些点对应的 $$\alpha_i$$ 都等于 0，这是支持向量机的一个重要性质。
+
+在继续推导拉格朗日对偶问题的公式之前，我们先来考虑支持向量机的软件隔分类问题，简单的说就是，我们得到的特征可能会出现噪声，产生了少量异常点，导致严格的线性可分条件不存在 或者说，即便能够找到分隔面，但是总体来看并不理想，还不如放开一些异常点，让大多数点能正常分类。
+
+![](../resources/2017-07-31-svm-equation/soft_margin.png)
+（图中橙色的分隔面虽然能完全对样本进行分类，但是总体来看并不如黑色的分隔面效果好）
+
+为了获取这种能力，可以考虑对约束条件放宽限制，即
+
+$$
+y_i(\omega^T x^{(i)} + b) \ge 1 - \xi_i ,\quad i = 1,,,n, \quad\xi_i \ge 0
+$$
+
+也就是说，允许一些点距离分隔面小于 1，甚至越过分隔面。但不能无限制的放纵，而是相应地在优化目标函数上添加一个惩罚项，即得到
+
+$$
+\min_{\omega,\xi} \frac 1 2 \|\omega\|^2 + C\sum_{i=1}^n \xi_i
+\\
+s.t.\quad y_i(\omega^T x^{(i)} + b) \ge 1 - \xi_i ,\quad i = 1,,,n\\
+\quad\xi_i \ge 0,\quad i = 1,,,n
+$$
+
+相应的拉格朗日函数为
+
+$$
+L(\omega, b, \xi, \alpha, \beta) =  \frac 1 2 \|\omega\|^2 + C\sum_{i=1}^n \xi_i + \sum_{i=1}^n \alpha_i [-y_i(\omega^T x^{(i)} + b) + 1 - \xi_i]-\sum_{i=1}^n\beta_i \xi_i
+$$
+
+并且拉格朗日对偶问题可以修改为
+
+$$
+\max_{\alpha_i \ge 0,\beta_i\ge 0}\min_{\omega, b, \xi}  L(\omega, b,\xi, \alpha,\beta)
+$$
+
+先求解 $$L(\omega, b,\xi, \alpha,\beta)$$ 关于 $$\omega, b, \\xi$$ 的极值
+
+$$
+\nabla_\omega L = \omega - \sum_{i=1}^n \alpha_i y_i x^{(i)} = 0
+$$
+$$
+\frac{\partial L}{\partial b} = \sum_{i=1}^n \alpha_i y_i = 0
+$$
+$$
+\frac{\partial L}{\partial \xi_i} = C -\alpha_i -\beta_i = 0
+$$
+
+于是可以得到
+
+$$
+\omega = \sum_{i=1}^n \alpha_i y_i x^{(i)}\\
+\sum_{i=1}^n \alpha_i y_i = 0\\
+ C =\alpha_i +\beta_i
+$$
+
+然后设拉格朗日函数的极值为 $$W(\alpha)$$，则有
+
+$$
+\begin{aligned}
+W(\alpha) &= \frac 1 2 \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j <x^{(i)}, x^{(j)}> +\sum_{i=1}^n (\alpha_i + \beta_i)\xi_i \\
+&-\sum_{i=1}^n \alpha_i y_i\sum_{j=1}^n \alpha_j y_j <x^{(i)}, x^{(j)}> + \sum_{i=1}^n \alpha_i -\sum_{i=1}^n \alpha_i \xi_i - \sum_{i=1}^n \beta_i \xi_i\\
+&=-\frac 1 2 \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j <x^{(i)}, x^{(j)}> + \sum_{i=1}^n \alpha_i
+\end{aligned}
+$$
+
+可以看到虽然引入了软间隔分类模型，待优化目标函数却不含任何与软间隔参数相关的量，这也使得求解简单了许多。但是引入新的拉格朗日乘子 $$\beta$$ 也要满足 KKT 条件，即
+
+$$
+\beta_i \xi_i = 0
+$$
+
+将 $$\beta_i = C - \alpha_i$$ 代入得
+
+$$
+(C - \alpha_i)\xi_i=0
+$$
+
+也就是说当 $$\xi_i > 0$$ 时，$$\alpha_i=C$$，而当 $$\xi_i=0$$ 时，$$\alpha_i <C$$ 这是由于 $$\beta_i \ge 0$$ 恒成立。
+
+
+
+
+
+
+
 
 
 待续
