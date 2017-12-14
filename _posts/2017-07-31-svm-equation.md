@@ -4,317 +4,158 @@ layout: default
 
 ## 支持向量机
 
-在n维空间上定义一个超平面
-
-$$\omega^T x + b = 0$$
-
-### 定义：函数间隔
-
-对于一个特征 F，通常使用空间中的一点来表示，如果已知其分类类型，那么这就成为一个训练数据，用二元组表示为：$$ (x^{(i)}, y^{(i)}) $$。定义训练数据与超平面的函数间隔
-
-$$\hat{\gamma}^{(i)} = y^{(i)} ( \omega^T x^{(i)} + b)$$
-
-将点 F 代入函数 $$\omega^T x + b$$ 中，实际上是在判断此点与上述超平面的位置关系。其正负号决定了该点位于超平面的哪一侧，而其绝对值则度量了该点与超平面的距离。
-如果规定 $$\omega^T x^{(i)} + b > 0 $$ 时，$$ y^{(i)} = 1 $$，反之 $$ y^{(i)} = -1 $$。那么显然，$$\hat{\gamma}^{(i)}$$ 始终为正。于是 $$\hat{\gamma}^{(i)}$$ 就可以看作点 F 到超平面的相对距离。
-若有一组特征及其分类结果组成的训练数据 $$S = \{(x^{(i)}, y^{(i)}) | i = 1,,,m\}$$ ，那么最小函数间隔就为
-
-$$ \hat{\gamma} = \min\limits_{i = 1,,,m} \hat{\gamma}^{(i)} $$
-
-### 定义：几何间隔
-
-![](/resources/2017-07-31-svm/geo-margin.png)
-
-可以证明，以 $$\omega$$ 为系数的超平面本身垂直于向量 $$\omega$$ 。假设点A的坐标为 $$x^{(i)}$$ ，到超平面的距离为 $$ \bar{\gamma}^{(i)} $$。那么过点A，作垂直于超平面的直线，交点为B，AB两点满足下面的关系
-
-$$ x^{(i)} = x_B + \omega \bar{\gamma}^{(i)} $$
-
-然后根据 $$ \omega^T x_B + b = 0 $$ ， 可得
-
-$$ \bar{\gamma}^{(i)} = \frac{\omega^T}{||\omega||} x^{(i)} + \frac{b}{||\omega||} $$
-
-同函数间隔类似，规定，当 $$\bar{\gamma}^{(i)} > 0$$ 时，$$y^{(i)} = 1$$ ，否则 $$y^{(i)} = -1$$。然后定义
-
-$$\gamma^{(i)} = y^{(i)} \bar{\gamma}^{(i)} = y^{(i)} \left(\frac{\omega^T}{||\omega||} x^{(i)} + \frac{b}{||\omega||} \right)$$
-
-显然，$$\gamma^{(i)} > 0$$ 恒成立。这里把 $$\gamma^{(i)}$$ 称为点A到超平面的几何间隔。值得注意的是，几何间隔实际就是点到超平面的距离。同样，对于一组训练数据集，定义最小几何间隔
-
-$$\gamma = \min\limits_{i = 1,,,m} \gamma^{(i)}$$
-
-### 最优间隔分类器
-
-所谓分类器其实就是一个超平面，其作用是在空间中将两类数据分开，可以想象，这样的超平面如果存在，那么很可能不止一个。而我们想要的其实是满足下述条件的超平面：对于一组训练数据，使得最小几何间隔最大，即所谓的最优间隔分类器，如下图所示
-
-![](/resources/2017-07-31-svm/max-margin.png)
-
-也就是说，要求解下面的优化问题
+考虑属于两个类别的样本集合
 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    \max\limits_{\omega, b}\quad \gamma \\ 
-    s.t.  \qquad\!y^{(i)} \left(\frac{\omega^T}{||\omega||} x^{(i)} + \frac{b}{||\omega||}\right) \geq \gamma \qquad i = 1,,,m
-  \end{array}
-\end{align*}
+S = \{(x^{(i)}, y_i )\,\mid i = 1,,,n\}
 $$
 
-考虑到函数间隔和几何间隔的定义，可以发现
+其中 $$x^{(i)}$$ 是维度为 *d* 的特征向量，$$y_i$$ 表示样本类别，等于 1 或者 -1。如果两个类别线性可分，那么将特征点集合投影到二维面上大致如下图所示
 
-$$\hat{\gamma}^{(i)} = ||\omega|| \gamma^{(i)}$$
- 
-于是，原问题可以重新表述为
+![](../resources/2017-07-31-svm-equation/samples.png)
 
-$$
-\begin{align*}
-  \begin{array} {cc}
-    \max\limits_{\omega, b}\quad \frac{\hat\gamma}{||\omega||} \\ 
-    s.t.  \qquad\!y^{(i)} \left(\omega^T x^{(i)} + b\right) \geq \hat\gamma \qquad i = 1,,,m
-  \end{array}
-\end{align*}
-$$
+为了将对数据进行分类，我们可以选择一个超平面对两类数据进行切割，显然这里有无数种切割方式，但是有的分隔面比其他面效果更好。支持向量机的任务就是找到这样一个分隔面，使得所有特征点到它的最小距离达到最大值，或者换句话说就是，使得两类特征点到分隔面的最小距离相等，如下图所示
 
-这就将原本由几何间隔表达的问题，转换成了用函数间隔来表达。
-这样做的原因在于：几何间隔是点到超平面的绝对距离，而函数间隔是相对距离，可以通过缩放 $$\omega, b$$ 这两个参数来调整。显然这一缩放操作，并不会影响超平面的位置。所以我们可以通过缩放将 $$\hat\gamma$$ 设置为1，而不改变整个系统本质。
-所以对 $$\frac{\hat{\gamma}^{(i)}}{||\omega||}$$ 的最大化，就是最大化 $$\frac{1}{||\omega||}$$，也等价于最小化 $$\frac 1 2 \omega^2$$。所以原问题又转换为
+![](../resources/2017-07-31-svm-equation/margin2.png)
+
+假设上图中的实线即为这样的超平面，设其方程为
 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    \min\limits_{\omega, b}\quad \frac 1 2 \omega^2 \\ 
-    s.t.  \qquad\!y^{(i)} \left(\omega^T x^{(i)} + b\right) \geq 1 \qquad i = 1,,,m
-  \end{array}
-\end{align*}
+\omega^T x +b = 0
 $$
 
-### 拉格朗日对偶问题
+我们说这样的分隔面使得特征点到它的最小距离最大，后续的讨论都将围绕这一目标来进行。
 
-考虑同时带有等式约束和不等式约束的优化问题（这里称之为原问题）
-
-$$
-\begin{align*}
-  \begin{array} {cc}
-    \min\limits_{\omega}\quad f(\omega) \\ 
-    s.t. \qquad g_i(\omega) \leq 0 \quad i = 1,,,m\\
-	\qquad h_i(\omega) = 0 \quad i = 1,,,k
-	
-  \end{array}
-\end{align*}
-$$
-
-建立拉格朗日函数
-
-$$L(\omega, \alpha, \beta) = f(\omega) + \sum_{i=1}^m \alpha_i g_i(\omega) + \sum_{i=1}^k \beta_i h_i(\omega)$$ 
-
-进而考虑下述优化问题
-
-$$\Theta_P(\omega) = \max\limits_{\alpha, \beta} L(\omega, \alpha, \beta) \quad \alpha_i > 0$$
-
-如果存在 $$g_i(\omega) > 0$$ 或者 $$h_i(\omega) \neq 0$$，那么我们可以找到适当 $$\alpha, \beta$$ 的使得 $$\Theta_P(\omega) = \infty$$。反之，如果 $$\omega$$ 满足原问题的所有约束条件，那么 $$L(\omega, \alpha, \beta)$$ 的最大值就等于 $$f(\omega)$$。
-于是有
+为了计算空间中一个点到超平面的距离，我们考虑如下位置关系，假设点 $$x^{(i)}$$ 距离超平面的距离为 $$\gamma_i$$，我们过这一点作一条垂线，垂足为 $$x_p$$，显然 $$x_p$$ 满足方程
 
 $$
-\begin{equation}
-  \Theta_P(\omega) = \left\{
-    \begin{aligned}
-	  f(\omega) \quad if \quad h_i(\omega) = 0 \quad and\quad g_i(\omega) \geq 0 \quad for \quad all \quad i\\ 
-	  \infty \qquad otherwise
-	\end{aligned}
-    
-  \right.
-\end{equation}
+\omega^T x_p + b = 0
 $$
 
-从而原问题可以表述为
+![](../resources/2017-07-31-svm-equation/margin.png)
 
-
-$$\min\limits_\omega \Theta_P(\omega) = \min\limits_\omega \max\limits_{\alpha, \beta} L(\omega, \alpha, \beta)$$
-
-
-假设 $$p^* = \min\limits_\omega \Theta_P(\omega)$$ 为原问题的解。另一方面，定义原问题的对偶问题
+并且可以证明从 $$x_p$$ 指向 $$x^{(i)}$$ 的方向为 $$\omega$$ ，于是存在下述关系
 
 $$
-d^* = \max\limits_{\alpha, \beta} \min\limits_\omega L(\omega, \alpha, \beta)
+x^{(i)} = x_p + \gamma_i \frac{\omega}{\|\omega\|}
 $$
 
-可以证明 $$d^* \leq p^*$$ 恒成立。并且在满足特定情况的条件下
-$$d^* = p^*$$
-
-假设 $$f, g_i(\omega)$$ 是凸函数，$$h_i(\omega)$$ 可以表示成 $$h_i(\omega) = a_i \omega + b$$，且存在 $$\omega$$ 使得 $$g_i(\omega) < 0$$。
-在这种假设下，必然存在 $$\omega^*$$ 是原问题的解，$$\alpha^*, \beta^*$$ 是对偶问题的解，并且 $$d^* = p^* = L(\omega^*, \alpha^*, \beta^*)$$，
-而且 $$\omega^*, \alpha^*, \beta^*$$ 还应满足KKT条件，即
+将 $$x^{(i)}$$ 代入函数 $$f(x) = \omega^T x + b$$
 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    \frac{\partial L^*}{\partial \omega_i} = 0, i = 1,,,n \quad(1)\\
-	\frac{\partial L^*}{\partial \beta_i} = 0, i = 1,,,n \quad (2)\\
-	\alpha_i^* g_i(\omega) = 0 ,i = 1,,,m \quad (3)\\
-	g_i(\omega) \leq 0, i = 1,,,m \quad (4) \\ 
-	\alpha_i \geq 0, i=1,,,m \quad (5)
-	
-  \end{array}
-\end{align*}
+\begin{aligned}
+f(x^{(i)}) &= \omega^T (x_p + \gamma_i \frac{\omega}{\|\omega\|}) + b\\
+&= \omega^T x_p + b + \gamma_i \|\omega\|\\
+&=\gamma_i \|\omega\|\\
+\gamma_i& =\frac{f(x^{(i)})}{\|\omega\|} =\frac{\omega^T}{\|\omega\|}x^{(i)} + \frac{b}{\|\omega\|}
+\end{aligned}
 $$
 
-特别注意第(3)个条件，如果 $$\alpha_i^* > 0$$，那么 $$g_i(\omega) = 0$$。
+对于第二个类别的数据，$$x^{(i)}$$ 位于超平面的另一边，如下图
 
-### 最优间隔分类器
+![](../resources/2017-07-31-svm-equation/margin3.png)
 
-现在回到最优间隔分类器的讨论，之前已经提出了下述的等价优化问题
-
-$$
-\begin{align*}
-  \begin{array} {cc}
-    \min\limits_{\omega}\quad f(\omega) \\ 
-    s.t. \qquad g_i(\omega) \leq 0 \quad i = 1,,,m\\
-	\qquad h_i(\omega) = 0 \quad i = 1,,,k
-	
-  \end{array}
-\end{align*}
-$$
-
-若设 $$ g_i(\omega) = -y^{(i)} (\omega^T x^{(i)} + b) + 1$$，那么约束条件可以表述为 $$g_i(\omega) \leq 0 \quad i = 1,,,m$$
-
-![](/resources/2017-07-31-svm/max-margin2.png)
-
-考虑到只有当数据点的函数间隔为1（即函数间隔取得最小值）时才有 $$g_i(\omega) = 0$$。所以对于大部分的点（如图所示），都有 $$g_i(\omega) > 0$$ ，也就是说 $$\alpha_i = 0$$ 。而使得 $$\alpha_i > 0$$ 的点即所谓的**支持向量** 。
-
-现在利用拉格朗日乘数法建立拉格朗日函数
+则类似地有
 
 $$
-L(\omega, b, \alpha) = \frac 1 2 \omega^2 + \sum_{i=1}^m \alpha_i [-y^{(i)} (\omega^T x^{(i)} + b) + 1]
-$$
-
-仿照前面的讨论，原问题表述为
-
-$$
-p^* = \min\limits_{\omega, b} \Theta_P (\omega, b, \alpha) = \min\limits_{\omega, b} \max\limits_\alpha L(\omega, b, \alpha)
-$$
-
-相应的对偶问题
-
-$$
-d^* = \max\limits_{\alpha} \Theta_D (\omega, b, \alpha) = \max\limits_\alpha \min\limits_{\omega, b} L(\omega, b, \alpha)
-$$
-
-我们首先求解 $$\min\limits_{\omega, b} L(\omega, b, \alpha)$$ ，通过求导建立方程组
-
-$$
-\begin{align*}
-  \begin{array}{cc}
-    \Delta_\omega L = \omega - \sum_{i=1}^m \alpha_i y^{(i)}x^{(i)} = 0\\
-	\frac{\partial L}{\partial b} = \sum_{i=1}^m \alpha_i y^{(i)} = 0
-  \end{array}
-\end{align*}
-$$
-
-解得
-
-$$
-\begin{align*}
-  \begin{array}{cc}
-	\omega = \sum_{i=1}^m \alpha_i y^{(i)} x^{(i)}\\
-	\sum_{i=1}^m \alpha_i y^{(i)} = 0
-  \end{array}
-\end{align*}
-$$
-
-然后将 $$\omega$$ 代回到拉格朗日函数，得到
-
-$$
-W(\alpha) = L(\omega, b, \alpha) = -\frac 1 2 \sum_{i, j=1}^m \alpha_i \alpha_j y^{(i)}y^{(j)} <x^{(i)}, x^{(j)}> + \sum_{i=1}^m \alpha_i
-$$
-
-其中 $$ <x^{(i)}, x^{(j)}>$$表示两个量的内积。于是对偶问题的解 
-
-$$d^* = \max\limits_\alpha \min\limits_{\omega, b} L(\omega, b, \alpha) = \max\limits_\alpha W(\alpha)$$
-
-其中 $$\alpha$$ 具有约束
-
-$$
-\begin{align*}
-  \begin{array}{cc}
-	\alpha_i \geq 0, \quad i = 1,,,m\\
-	\sum_{i=1}^m \alpha_i y^{(i)} = 0
-  \end{array}
-\end{align*}
-$$
-
-### 软间隔分类器
-
-![](/resources/2017-07-31-svm/soft-margin.png)
-
-考虑两种情形，第一种如上图所示，有一个数据点产生异常。如果要使产生的超平面将两类数据完全分开，即如虚线所示，但这条线对数据的分割明显不如实线，也就是说可疑数据的干扰影响了分类器的正确判断。另外一种情况是，数据点集合本身就无法完全分割。这样一来就需要对算法进行改进，使其能适当允许数据偏离。定义如下优化：
-
-$$
-\begin{align*}
-  \begin{array} {cc}
-    \min\limits_{\omega, b}\quad \frac 1 2 \omega^2 + C \sum_{i=1}^m \xi_i \\ 
-    s.t. \qquad y^{(i)}(\omega^T x^{(i)} + b \geq 1 -\xi) \quad i = 1,,,m\\
-	\qquad \xi \geq 0 \quad i = 1,,,m
-  \end{array}
-\end{align*}
-$$
-
-也就是说，允许某些点到超平面的函数距离小于1，甚至越过超平面，但是其代价是在目标函数产生适当增量， $$C$$ 为适当参数，应在实际训练中调节，最终产生对各方面都有适当顾及的分割面。然后建立拉格朗日函数
-
-$$
-L(\omega,b,\alpha,\gamma, \xi) = \frac 1 2 \omega^2 + C \sum_{i=1}^m \xi_i + \sum_{i=1}^m \alpha_i [-y^{(i)}(\omega^T x^{(i)} + b) - \xi_i + 1] - \sum_{i=1}^m \xi_i \gamma_i
-$$
-
-其中 $$\gamma$$ 恒大于等于0。 
-
-然后再考虑原问题与相应的对偶问题
-
-$$
-p^* = \min\limits_{\omega, b, \xi} \Theta_P (\omega, b, \alpha, \xi,\gamma) = \min\limits_{\omega, b,\xi} \max\limits_{\alpha, \gamma \geq 0} L(\omega, b, \alpha, \xi, \gamma)
+x^{(i)} = x_p - \gamma_i \frac{\omega}{\|\omega\|}
 $$
 
 $$
-d^* = \max\limits_{\alpha,\gamma} \Theta_D (\omega, b, \alpha,\xi,\gamma) = \max\limits_{\alpha, \gamma} \min\limits_{\omega, b, \xi} L(\omega, b, \alpha, \xi, \gamma)
+\gamma_i =-\left( \frac{\omega^T}{\|\omega\|}x^{(i)} + \frac{b}{\|\omega\|}\right)
 $$
 
-对参数求导解问题 $$\min\limits_{\omega, b, \xi} L(\omega, b, \alpha, \xi, \gamma)$$
+设第一个类别的标签为 $$y_i = 1$$，第二类别为 $$y_i = -1$$，那么可以将距离统一写成
 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    \Delta_\omega L = \omega - \sum_{i=1}^m \alpha_i y^{(i)}x^{(i)} = 0\\
-	\frac{\partial L}{\partial b} = \sum_{i=1}^m \alpha_i y^{(i)} = 0\\
-	\frac{\partial L}{\partial \xi_j} = C -\alpha_j - \gamma_j = 0
-  \end{array}
-\end{align*}
+\gamma_i =y_i \left(\frac{\omega^T}{\|\omega\|}x^{(i)} + \frac{b}{\|\omega\|}\right)
 $$
 
-第1、2个方程与前面的推导一样，唯一的区别是增加了一个条件 $$C-\alpha_i - \gamma_i = 0$$，由于 $$\gamma \geq 0$$ 始终成立，所以 $$\alpha_i < C$$。
-于是最终，我们要求解的问题更新为
+这里的 $$\gamma_i$$， 就是特征点到超平面的间隔。对于一个特定的超平面，用 $$\omega, b$$ 来定义，不同的特征到它有不同的间隔值，而最小的那个间隔就被定义为
 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    \max\limits_{\alpha}\quad W(\alpha) \\ 
-    s.t. \quad 0 \leq \alpha_i \leq  C \quad i = 1,,,m\\
-	\qquad \sum_{i=1}^m \alpha_i y^{(i)} = 0 \quad i = 1,,,m
-  \end{array}
-\end{align*}
+\gamma = \min_{i=1,,,n} \gamma_i
 $$
 
-现在来考虑软间隔问题优化的KKT条件(3)，这里分两种情况来讨论:
+为了找到最合适的分隔面，我们定义的目标就是搜寻 $\omega, b$， 使得上述得到的最小间隔有最大的值，即
 
-1. 当 $$1-y^{(i)}(\omega^T x^{(i)} + b) \leq 0$$，这时 $$\xi_i=0$$，属于线性可分情况，那么 $$\alpha_i g_i(\omega) \leq 0$$，从而当 $$y^{(i)}(\omega^T x^{(i)} + b) > 1$$ 时，$$\alpha_i=0$$，而当时 $$y^{(i)}(\omega^T x^{(i)} + b) = 1$$，$$0 < \alpha_i < C$$
-
-2. 当 $$1-y^{(i)}(\omega^T x^{(i)} + b) > 0$$，这时 $$\xi_i>0$$，即遇到不可分数据，而原问题要求最大化拉格朗日函数 L，于是需要 $$\gamma_i = 0$$，那么就有 $$\alpha_i = C$$。
-
-结合以上两种情况，可以得出 $$\alpha_i$$ 作为最优解应满足的条件
- 
 $$
-\begin{align*}
-  \begin{array} {cc}
-    y^{(i)}(\omega^T x^{(i)} + b) > 1  => \alpha_i = 0\\
-	y^{(i)}(\omega^T x^{(i)} + b) = 1  => 0 < \alpha_i < C\\
-	y^{(i)}(\omega^T x^{(i)} + b) < 1  => \alpha_i = C
-  \end{array}
-\end{align*}
-$$ 
+\max_{\omega, b}\,\gamma
+$$
 
-通过以上的分析，我们得到了支持向量机应该求解的优化问题，然而这只是第一步，怎样高效的求解上述问题将是下一阶段的话题。
+其中 $$\gamma$$ 应满足
 
+$$
+\quad y_i \left(\frac{\omega^T}{\|\omega\|}x^{(i)} + \frac{b}{\|\omega\|}\right) \ge \gamma\,\,,\, i = 1,,,n
+$$
+
+这就是优化问题的约束条件。考虑将不等式两边同时乘以 $$\omega$$
+
+$$
+\quad y_i \left(\omega^Tx^{(i)} + b\right) \ge \|\omega\|\gamma\,\,,\, i = 1,,,n
+$$
+
+对于特定的问题，尽管还没有解出来，但是我们知道其固有的 $$\gamma$$ 是定值，而 $$\omega$$ 就不那么确定了，我们可以对其各分量等比例缩放，却不会对超平面的位置与方向造成影响，于是我们可以令
+
+$$
+\|\omega\| \gamma = 1
+$$
+
+那么优化问题就变成了
+
+$$
+\max_{\omega, b} \frac 1 {\|\omega\|}\\
+s.t.\quad g(x^{(i)}) \le 0 ,\, i = 1,,,n
+$$
+
+其中 $$g(x^{(i)}) =- y_i(\omega^T x^{(i)} + b)+1$$。上面的问题也等价于
+
+$$
+\min_{\omega, b} \frac 1 2 \|\omega\|^2\\
+s.t.\quad g(x^{(i)}) \le 0 ,\, i = 1,,,n
+$$
+
+这是一个有不等式约束的凸优化问题，可以利用拉格朗日乘子法求解，首先建立拉格朗日函数
+
+$$
+L(\omega, b,\alpha) = \frac 1 2 \|\omega\|^2 + \sum_{i=1}^n \alpha_i [- y_i(\omega^T x^{(i)} + b)+1]
+$$
+
+其中 $$\alpha$$ 为拉格朗日乘子向量，规定它的每个分量都为非负值。
+
+然后定义
+
+$$
+\Theta_p(\omega, b) = \max_{\alpha_i \ge 0} L(\omega, b, \alpha)
+$$
+
+由于 $$\alpha_i$$ 的任意性，如果任一约束条件得不到满足，都能使拉格朗日函数趋于无穷大，而当所有约束条件都满足时，有
+
+$$
+\Theta_p(\omega, b) = \frac 1 2 \|\omega\|^2
+$$
+
+所以上述带不等式约束的凸优化问题，可以转换成不带约束的凸优化问题
+
+$$
+\min_{\omega, b} \max_{\alpha_i \ge 0} L(\omega, b, \alpha)
+$$
+
+前面的约束 $$g(x_i) \le 0$$ 在这里是自然成立的，因为如果有一项不成立，将取不到极小值。
+
+如果满足一定的条件，那么上述问题又可转换成其对偶形式
+
+$$
+\max_{\alpha_i \ge 0}\min_{\omega, b}  L(\omega, b, \alpha)
+$$
+
+
+
+待续
+
+
+
+
+
+
+end
