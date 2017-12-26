@@ -204,9 +204,11 @@ $$
 $$
 \nabla_\omega L = \omega - \sum_{i=1}^n \alpha_i y_i x^{(i)} = 0
 $$
+
 $$
 \frac{\partial L}{\partial b} = \sum_{i=1}^n \alpha_i y_i = 0
 $$
+
 $$
 \frac{\partial L}{\partial \xi_i} = C -\alpha_i -\beta_i = 0
 $$

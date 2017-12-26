@@ -6,10 +6,10 @@ layout: default
 
 如果样本点具有很高维的特征，那么我们就必须要使用很长的数组去存储，但是如果这些特征中有许多都是不必要的，那么这不仅浪费了存储空间，而且也为训练过程带来了额外的计算量。例如在手写数字识别中，需要将图片分割成 n by n 的矩阵，令有像素的块为 1，没有像素的块为 0，然后再用一个 n*n 容量的数组去存储一副图片的特征。
 
-![](../resources/2017-12-21-principal-components-analysis/digits.png)
+![](/resources/2017-12-21-principal-components-analysis/digits.png)
 （每个图片可以使用矩阵来分割，并且存储成数组）
 
-但是可以发现，这样的数组大部分的分量都是 0，而这些 0 并不能作为某个数字的特征。所以很多时候我们需要对拿到的数据进行处理，提取出具有代表性的特征，才能更好地加入训练模型之中。
+但是这样的数组大部分的分量都是 0，而这些 0 并不能作为某个数字的特征。所以很多时候我们需要对拿到的数据进行处理，提取出具有代表性的特征，才能更好地加入训练模型之中。
 
 主成分分析便是一种有效的数据降维处理方法，为了对问题进行说明，我们先用具有两个维度的样本集作为例子。
 
@@ -21,7 +21,7 @@ $$
 
 其中每个点 $$x_i$$ 含有两个分量。那么根据点集的分布情况，可以发现，在某些方向上，点的散布性更强，而更强的散布性则意味着更好的代表性。
 
-![](../resources/2017-12-21-principal-components-analysis/distribution.png)
+![](/resources/2017-12-21-principal-components-analysis/distribution.png)
 （散点的分布在一个方向上有很好的散布性，而在另一个方向上的散布性稍差）
 
 为了衡量这种散布性，我们考虑一条过原点的直线
@@ -205,7 +205,7 @@ $$
 \|\omega^{(2)}\| = 1
 $$
 
-然后我们将证明，满足上述条件的 $$\omega_^{(2)}$$ 必然使
+然后我们将证明，满足上述条件的 $$\omega^{(2)}$$ 必然使
 
 $$
 Y_2 = \sum_{i=1}^d \omega^{(2)}_i X_i
@@ -264,7 +264,7 @@ $$
 
 然后我们用主成分分析方法跑一个实际的例子，使用著名的 [鸢尾花数据集](https://archive.ics.uci.edu/ml/datasets/iris) 。这个数据集包含 3 种鸢尾花的子属，记录了花瓣与花萼的长宽尺寸作为特征。
 
-![](../resources/2017-12-21-principal-components-analysis/feature.png)
+![](/resources/2017-12-21-principal-components-analysis/feature.png)
 （单独使用一种特征绘制的散点图，不同颜色代表不同种类）
 
 分别计算这四个特征的方差值为
@@ -291,12 +291,12 @@ $$
 
 这就要显得合理许多。
 
-![](../resources/2017-12-21-principal-components-analysis/feature_1.png)
+![](/resources/2017-12-21-principal-components-analysis/feature_1.png)
 （数据归一化之后的特征分布）
 
 然后将归一化的特征代入主成分分析算法，得到的四阶主成分
 
-![](../resources/2017-12-21-principal-components-analysis/PCA.png)
+![](/resources/2017-12-21-principal-components-analysis/PCA.png)
 
 它们的方差（或者说协方差矩阵的特征值）分别为
 
