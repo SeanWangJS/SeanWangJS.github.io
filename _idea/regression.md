@@ -172,15 +172,15 @@ $$
 我们假设参数 $$\omega$$ 的先验分布为似然函数的共轭先验，即均值为 0 的多元高斯分布，协方差矩阵为 $\sigma_{\omega}^2 \mathbf{I}$
 
 $$
-p(\omega\mid\sigma_{\omega}^2) =\left( \frac{1}{2\pi \sigma_{\omega}^2}\right)^{\frac{m+1}2} \exp\left(
--\frac 1 {2\sigma_{\omega}^2} \omega^T \omega
+p(\omega\mid\sigma_{\omega}^2) =\frac{1}{\sqrt{(2\pi)^{m+1}}\sigma_{\omega}^{m+1}} \exp\left(
+-\frac 1 {2\sigma_{\omega}^{2}} \omega^T \omega
   \right)
 $$
 
 给定数据集，我们可以利用贝叶斯定理来得到 $$\omega$$ 的后验分布
 
 $$
-p(\omega \mid \mathbf{x}, \mathbf{t}) = \frac{p(\mathbf{t}\mid \omega, \mathbf{x}) p(\omega)}{p(\mathbf{t})}
+p(\omega \mid \mathbf{x}, \mathbf{t}) =\frac{p(\mathbf{t}\mid \omega, \mathbf{x}) p(\omega)}{p(\mathbf{t})}
 $$
 
 注意为了表达逻辑清晰，上式省略了超参数 $$\sigma^2, \sigma_{\omega}^2$$。由于 $$p(\mathbf{t})$$ 与这里的各种模型参数都无关（这可以看作是目标值的先验分布，与回归模型的系数，系数的分布方差以及目标值后验分布方差都无关），于是
@@ -196,7 +196,7 @@ $$
 p(\mathbf{t}\mid \omega, \mathbf{x}, \sigma^2) p(\omega\mid \sigma_{\omega}) &=  \frac{1}{(\sqrt{2\pi}\sigma)^n}\exp\left(
 -\sum_{i=1}^n \frac{(t_i-\omega^T \hat{x}_i)^2}{2\sigma^2}
   \right) \\
-  &\cdot \left( \frac{1}{2\pi \sigma_{\omega}^2}\right)^{\frac{m+1}2} \exp\left(
+  &\cdot \frac{1}{\sqrt{(2\pi)^{m+1}}\sigma_{\omega}^{m+1}} \exp\left(
   -\frac 1 {2\sigma_{\omega}^2} \omega^T \omega
     \right)\\
 
@@ -241,7 +241,7 @@ $$
 p(t\mid x, \omega) = N(\omega^T \hat{x}, \sigma^2)
 $$
 
-但是并未具体计算出 $$p(\omega\mid \mathbf{x}, \mathbf{t})$$ 的表达式，下面我们先来整这事儿。
+但是并未知晓 $$p(\omega\mid \mathbf{x}, \mathbf{t})$$ 的表达式，下面我们先来整这事儿。
 
 利用贝叶斯定理
 
@@ -279,7 +279,7 @@ p(\mathbf{t}\mid \omega) &= \frac{1}{(\sqrt{2\pi}\sigma)^n}\exp\left(
   &=\frac{1}{(\sqrt{2\pi}\sigma)^n}\exp\left(
   -\frac 1 {2\sigma^2} (\mathbf{t} - A^T \omega)^T (\mathbf{t} - A^T \omega)
     \right)\\
-    &= \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac n 2}}\exp\left(-\frac 1 2 (\mathbf{t} - A^T \omega)^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - A^T \omega)\right)
+    &= \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac 1 2}}\exp\left(-\frac 1 2 (\mathbf{t} - A^T \omega)^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - A^T \omega)\right)
   \end{aligned}
 $$
 
