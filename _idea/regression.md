@@ -161,7 +161,7 @@ $$
 
 这是一个比单纯的点估计 $$y(x,\omega)$$ 更有意思的结论，因为它给出了取得特定值的确信程度。
 
-为了表达上的简洁，我们把 $$y(x, \omega)$$ 写成向量积的形式
+下面我们将用贝叶斯理论来考虑参数的计算。为了表达上的简洁，我们把 $$y(x, \omega)$$ 写成向量积的形式
 
 $$
 y(x, \omega) = \omega^T \hat{x}
@@ -169,7 +169,7 @@ $$
 
 其中 $$\hat{x}$$ 是 *x* 的各阶指数组成的列向量 $\hat{x} = \{1, x_1,x_2,,, x_m\}^T$$ 。
 
-利用共轭先验，我们可以假设参数 $$\omega$$ 的先验分布为均值为 0 的多元高斯分布，并且协方差矩阵为 $\sigma_{\omega}^2 \mathbf{I}$，即
+我们假设参数 $$\omega$$ 的先验分布为似然函数的共轭先验，即均值为 0 的多元高斯分布，协方差矩阵为 $\sigma_{\omega}^2 \mathbf{I}$
 
 $$
 p(\omega\mid\sigma_{\omega}^2) =\left( \frac{1}{2\pi \sigma_{\omega}^2}\right)^{\frac{m+1}2} \exp\left(
@@ -213,15 +213,55 @@ $$
 \end{aligned}
 $$
 
-其中 $$C$$ 是一个与 $$\omega$$ 无关的量，$$\lambda = \frac{\sigma^2}{\sigma_{\omega}^2}$$。于是在给定 $$\sigma^2,\sigma_{\omega}^2$$ 的情况下，最大化 $$\omega$$ 的后验概率就等价于最小化 $$L(\omega)$$，而
+其中 $$C$$ 是一个与 $$\omega$$ 无关的量，$$\lambda = \frac{\sigma^2}{\sigma_{\omega}^2}$$。于是在给定 $$\sigma^2,\sigma_{\omega}^2$$ 的情况下，最大化 $$\omega$$ 的后验概率就等价于最小化 $$L(\omega)$$，而由于
 
 $$
 L(\omega) = err(\omega) + \frac \lambda 2 \omega^T \omega
 $$
 
-可以发现，相较于单纯地优化误差函数 $$err(\omega)$$ ，上式还增加了额外的项，直观地看，这一项对 $$\omega$$ 的有效数量和值产生了抑制作用，也可以说是控制了模型的复杂度。
+可以发现，相较于单纯地优化误差函数 $$err(\omega)$$ ，上式还增加了额外的项，直观地看，这一项对 $$\omega$$ 的有效数量和值产生了抑制作用，也可以说是控制了模型的复杂度。这额外添加的项也称为正则项，它使得通过贝叶斯方法得到的模型能够有效地避免过拟合问题。
 
-但是上述过程得到的也只是系数向量 $$\omega$$ 的点估计，没有说明它等于某个具体向量的概率是多少，这是我们下面要解决的问题。
+前面的讨论中，我们专注于对 $$\omega$$ 进行极大似然估计，然后计算得到的是在已知 $$\omega$$ 的情况下， 给定 *x* 后，*t* 取值的条件概率，即 $$p(t\mid x, \omega)$$，但是我们更想知道的是不依赖于 $$\omega$$ 的概率分布，即 $$p(t\mid x)$$，这可以通过对所有 $$\omega$$ 进行积分得到
+
+$$
+p(t\mid x) =\int p(\omega, t\mid x)\mathbf{d}\omega= \int p(t\mid x, \omega)p(\omega) \mathrm{d}\omega
+$$
+
+总体来看，*t* 的取值还依赖于数据集，也就是说单纯地给出 *x* 并不能得出什么有意义的结论，$$p(t\mid x )$$ 写成 $$p(t\mid x, \mathbf{x}, \mathbf{t})$$ 才是有意义的，这时积分的形式可以写成
+
+$$
+p(t\mid x,\mathbf{x}, \mathbf{t}) = \int p(t\mid x, \omega)p(\omega \mid\mathbf{x}, \mathbf{t}) \mathrm{d}\omega
+$$
+
+（由于给出了 $$x, \omega$$ 之后，*t* 便有了确定的值，所以积分项中，$$p(t\mid x,\omega)$$ 不用再显式地依赖于 $$\mathbf{x}, \mathbf{t}$$）
+
+根据前面的讨论，我们知道 $$p(t\mid x, \omega)$$ 的形式为
+
+$$
+p(t\mid x, \omega) = N(\omega^T \hat{x}, \sigma^2)
+$$
+
+但是并未具体计算出 $$p(\omega\mid \mathbf{x}, \mathbf{t})$$ 的表达式，下面我们先来整这事儿。
+
+利用贝叶斯定理
+
+$$
+p(\omega\mid \mathbf{x}, \mathbf{t}) = \frac{p(\mathbf{t}\mid \mathbf{x}, \omega) p(\omega)}{p(\mathbf{t})}
+$$
+
+将上式展开写
+
+$$
+\begin{aligned}
+p(t\mid x,\mathbf{x}, \mathbf{t}) &= \int p(t\mid x, \omega) \frac 1 {p(\mathbf{t})} p(\mathbf{t}\mid \omega, \mathbf{x})p(\omega) \mathrm{d}\omega\\
+&=
+\end{aligned}
+$$
+
+---------------------------------------------------------
+I think think
+
+*但是上述过程得到的也只是系数向量 $$\omega$$ 的点估计，没有说明它等于某个具体向量的概率是多少，这是我们下面要解决的问题。*
 
 还是考虑 $$\omega$$ 的后验分布
 
@@ -237,24 +277,24 @@ p(\mathbf{t}\mid \omega) &= \frac{1}{(\sqrt{2\pi}\sigma)^n}\exp\left(
 -\sum_{i=1}^n \frac{(t_i-\omega^T \hat{x}_i)^2}{2\sigma^2}
   \right)\\
   &=\frac{1}{(\sqrt{2\pi}\sigma)^n}\exp\left(
-  -\frac 1 {2\sigma^2} (\mathbf{t} - \omega^T A)^T (\mathbf{t} - \omega^T A)
+  -\frac 1 {2\sigma^2} (\mathbf{t} - A^T \omega)^T (\mathbf{t} - A^T \omega)
     \right)\\
-    &= \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac n 2}}\exp\left(-\frac 1 2 (\mathbf{t} - \omega^T A)^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - \omega^T A)\right)
+    &= \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac n 2}}\exp\left(-\frac 1 2 (\mathbf{t} - A^T \omega)^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - A^T \omega)\right)
   \end{aligned}
 $$
 
-上面为了将求和写成向量乘法的形式，引入了新的符号 $$A = [\hat{x}_1,\hat{x}_2,..., \hat{x}_n]$$，这是一个 m x n 的矩阵。
+上面为了将求和写成向量乘法的形式，引入了新的符号 $$A = [\hat{x}_1,\hat{x}_2,..., \hat{x}_n]$$，这是一个 m+1 x n 的矩阵。
 
- 从上式可以看出，似然函数其实是一个均值为 $$\omega^T \hat{x}$$，协方差矩阵为 $$\sigma^2 \mathbf{I}$$ 的高斯分布。于是
+ 从上式可以看出，似然函数其实是一个均值为 $$\omega^T \hat{x}$$，协方差矩阵为 $$\sigma^2 \mathbf{I}$$ 的高斯分布。接下来先计算 $$\omega, \mathbf{t}$$ 的联合分布
 
 $$
 \begin{aligned}
-p(\omega \mid \mathbf{t} ) &= \frac{1}{p(\mathbf{t})} \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac n 2}}\exp\left(-\frac 1 2 (\mathbf{t} - \omega^T \hat{x})^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - \omega^T \hat{x})\right)\\
+p(\omega ,\mathbf{t} ) &=  \frac{1}{(\sqrt{2\pi})^n |\sigma^2 \mathbf{I}|^{\frac n 2}}\exp\left(-\frac 1 2 (\mathbf{t} - A^T \omega)^T (\sigma^2 \mathbf{I})^{-1}(\mathbf{t} - A^T \omega)\right)\\
 &\cdot \left( \frac{1}{2\pi \sigma_{\omega}^2}\right)^{\frac{m+1}2} \exp\left(
 -\frac 1 {2\sigma_{\omega}^2} \omega^T \omega
   \right)\\
-  &= \frac 1 {p(t)} \frac 1 {(\sqrt{2\pi})^{m+n+1} \sigma^n \sigma_{\omega}^{m+1}}\exp\left(-\frac 1 {2\sigma^2} (\mathbf{t}-\omega^T\hat{x})^T(\mathbf{t}-\omega^T\hat{x}) - \frac 1 {2\sigma_{\omega}^2} \omega^T \omega
-     \right)\\
+  &= \frac 1 {(\sqrt{2\pi})^{m+n+1} \sigma^n \sigma_{\omega}^{m+1}}\exp\left(-\frac 1 {2\sigma^2} (\mathbf{t}-A^T \omega)^T(\mathbf{t}-A^T \omega) - \frac 1 {2\sigma_{\omega}^2} \omega^T \omega
+     \right)
 \end{aligned}
 $$
 
@@ -263,10 +303,26 @@ $$
 $$
 \begin{aligned}
 &-\frac 1 {2\sigma^2}
- (\mathbf{t}-\omega^T\hat{x})^T(\mathbf{t}-\omega^T\hat{x}) - \frac 1 {2\sigma_{\omega}^2} \omega^T \omega\\
- &= -\frac 1 2 \left[\sigma^{-2} \mathbf{t}^T \mathbf{t} + \omega^T (\sigma^{-2}\hat{x} \hat{x}^T + \sigma_{\omega}^{-2})\omega  \right]
+ (\mathbf{t}-A^T \omega)^T(\mathbf{t}-A^T \omega) - \frac 1 {2\sigma_{\omega}^2} \omega^T \omega\\
+ &= -\frac 1 2 \left[\sigma^{-2} \mathbf{t}^T \mathbf{t} + \omega^T (\sigma^{-2}AA^T + \sigma_{\omega}^{-2}\mathbf{I}_{m+1})\omega - \sigma^{-2}\mathbf{t}^T A^T \omega  -\sigma^{-2} \omega^T A \mathbf{t} \right]
+\\
+&= -\frac 1 2 (\mathbf{t}^T \quad \omega^T)
+\left[\begin{aligned}\sigma^{-2}\mathbf{I}_n &\quad \sigma^{-2}A^T\\
+\sigma^{-2}A&\quad  \sigma^{-2}AA^T + \sigma_{\omega}^{-2}\mathbf{I}_{m+1} \end{aligned}\right]
+\left(\begin{aligned}\mathbf{t}\\\omega\end{aligned}\right)\\
+&= -\frac 1 2 \mathbf{z}^T R \mathbf{z}
 \end{aligned}
 $$
+
+其中 $$\mathbf{z} = (\mathbf{t}^T\quad \omega^T)$$ 代入原指数项
+
+$$
+p(\omega, \mathbf{t}) = \frac 1 {(\sqrt{2\pi})^{m+n+1} \sigma^n \sigma_{\omega}^{m+1}} \exp\left(-\frac 1 2 \mathbf{z}^T R \mathbf{z}\right)
+$$
+
+可以看到，$$\omega, \mathbf{t}$$ 的联合分布实际上是一个高斯分布，它的均值为 0， 协方差矩阵 $$\Sigma_{z} = R^{-1}$$。
+
+
 
 前面假设了参数 $$\omega$$ 服从均值为 0，方差为 $$\sigma_{\omega}^2\mathbf{I}$$ 的高斯分布，为了泛用性，这里放宽一下条件，设先验分布为一般高斯分布
 
