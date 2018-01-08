@@ -71,7 +71,7 @@ $$
 由于是对 *y* 的积分，所以与 *y* 无关的项可以提到积分符号外面去，即得到
 
 $$
-p(x) = \frac{1}{2\pi \sqrt{|\Sigma|}} \exp(C(x)+C) \int_{-\infty}^{\infty} e^{C(y)} \mathrm{d}y
+p(x) = \frac{1}{2\pi \sqrt{\mid\Sigma\mid}} \exp(C(x)+C) \int_{-\infty}^{\infty} e^{C(y)} \mathrm{d}y
 $$
 
 为了计算[高斯积分](https://en.wikipedia.org/wiki/Gaussian_integral)，我们先对 $$C(y)$$ 进行配平方
@@ -137,7 +137,7 @@ $$
 p(x) = \frac{1}{\sqrt{2\pi} (\lambda_{22}|\Sigma|)^{\frac 1 2}} \exp(-\frac{(x - \mu_1)^2}{2\lambda_{22}|\Sigma|} )
 $$
 
-也就是说，*x* 的分布为以 $$\mu_1$$ 为均值，$$\lambda_{22}|\Sigma|$$ 为方差的高斯分布，除此之外它还有个系数 $$\frac{e^D}{\sqrt{2}}$$。
+也就是说，*x* 的分布为以 $$\mu_1$$ 为均值，$$\lambda_{22}\mid\Sigma\mid$$ 为方差的高斯分布，除此之外它还有个系数 $$\frac{e^D}{\sqrt{2}}$$。
 
 我们仔细考察一下边缘分布的均值与方差，容易发现，其均值实际上刚好等于联合分布下 *x* 分量的均值。然后我们再简单计算一下协方差矩阵的逆矩阵
 
@@ -149,7 +149,7 @@ $$
 \right]
 $$
 
-于是可以得到 $$\lambda_{22} = \frac{\sigma_{11}}{|\Sigma|}$$，那么边缘分布的方差其实就等于 $$\sigma_{11}$$，而这其实就是原联合分布下 *x* 分量的方差。最终可得
+于是可以得到 $$\lambda_{22} = \frac{\sigma_{11}}{\mid\Sigma\mid}$$，那么边缘分布的方差其实就等于 $$\sigma_{11}$$，而这其实就是原联合分布下 *x* 分量的方差。最终可得
 
 $$
 p(x) = \frac{1}{\sqrt{2\pi  \sigma_{11}} } \exp\left(-\frac{(x - \mu_1)^2}{2\sigma_{11}} \right)
