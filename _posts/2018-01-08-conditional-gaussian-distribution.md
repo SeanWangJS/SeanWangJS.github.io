@@ -4,7 +4,12 @@ layout: default
 
 ## 条件高斯分布
 
-均值为 $$\mu$$ ，协方差矩阵为 $$\Sigma$$ 的多元高斯分布为
+* [边缘分布——二维情况](#d1case)
+* [边缘分布——高维情况](#dncase)
+* [条件分布——二维情况](#cd1case)
+* [条件分布——高维情况](#cdncase)
+
+最初，均值为 $$\mu$$ ，协方差矩阵为 $$\Sigma$$ 的多元高斯分布具有如下形式
 
 $$
 p(\mathbf{x}) = \frac{1}{\sqrt{(2\pi)^d |\Sigma|}} \exp\left(
@@ -24,7 +29,7 @@ $$
 \right]
 $$
 
-其中 $$\sigma_{12} = \sigma_{21}$$。为了表达方便，这里设协方差矩阵的逆矩阵为
+其中 $$\sigma_{12} = \sigma_{21}$$。为了表达方便，这里假设了设协方差矩阵的逆矩阵
 
 $$
 \Sigma^{-1} =
@@ -35,7 +40,7 @@ $$
 \right]
 $$
 
-其中 $$\lambda_{12} = \lambda_{21}$$。于是高斯分布的表达式就为
+其中 $$\lambda_{12} = \lambda_{21}$$。于是高斯分布的表达式就展开成了下述形式
 
 $$
 p(x, y) =  \frac{1}{2\pi \sqrt{|\Sigma|}} \exp\left(-\frac 1 2
@@ -44,7 +49,7 @@ p(x, y) =  \frac{1}{2\pi \sqrt{|\Sigma|}} \exp\left(-\frac 1 2
 \right)
 $$
 
-### 边缘分布
+### <span id="d1case">边缘分布——二维情况</span>
 
 为了计算多元高斯分布的边缘分布，我们需要对其余变量在全空间上积分。也就是说
 
@@ -163,6 +168,8 @@ $$
 
 这是一个很强的结论，它让我们可以不必通过计算，直接通过联合分布的表达式写出边缘分布的表达式，下面我们试着将其推广到更高阶的情形。
 
+### <span id="dncase">边缘分布——高维情况</span>
+
 设 d 维随机向量
 
 $$
@@ -176,7 +183,7 @@ $$
 其中 $$\mathbf{x},\mathbf{y}$$ 都是向量，它们的维数和等于 d，并且 $$\mathbf{z}$$ 的分布为高斯分布，即
 
 $$
-p(\mathbf{z}) = \frac{1}{\sqrt{(2\pi)^d |\Sigma|}} \exp\left(
+p(\mathbf{x},\mathbf{y})=p(\mathbf{z}) = \frac{1}{\sqrt{(2\pi)^d |\Sigma|}} \exp\left(
 -\frac 1 2 (\mathbf{z} - \mu)^T \Sigma^{-1} (\mathbf{z} - \mu)
 \right)
 $$
@@ -365,7 +372,7 @@ $$
 于是
 
 $$
-p(\mathbf{x})=\frac 1 {\sqrt{(2\pi)^{d-k} |\Sigma| |\Lambda_{yy}|}}\exp\left(-\frac 1 2(\mathbf{x} - \mu_1)^T \Sigma_{xx}^{-1}(\mathbf{x} - \mu_1)\right)
+p(\mathbf{x})=\frac 1 {\sqrt{(2\pi)^{d-k} |\Sigma| |\Lambda_{yy}|}}\exp\left(-\frac 1 2(\mathbf{x} - \mu_x)^T \Sigma_{xx}^{-1}(\mathbf{x} - \mu_x)\right)
 $$
 
 另一方面，[分块矩阵的行列式](http://djalil.chafai.net/blog/2012/10/14/determinant-of-block-matrices/)为
@@ -391,19 +398,21 @@ $$
 那么我们看到
 
 $$
-p(\mathbf{x})=\frac 1 {\sqrt{(2\pi)^{d-k}  |\Sigma_{xx}|}}\exp\left(-\frac 1 2(\mathbf{x} - \mu_1)^T \Sigma_{xx}^{-1}(\mathbf{x} - \mu_1)\right)
+p(\mathbf{x})=\frac 1 {\sqrt{(2\pi)^{d-k}  |\Sigma_{xx}|}}\exp\left(-\frac 1 2(\mathbf{x} - \mu_x)^T \Sigma_{xx}^{-1}(\mathbf{x} - \mu_x)\right)
 $$
 
-这一结果就表明，当联合分布为高斯分布时，其边缘分布也为高斯分布，并且其均值和协方差矩阵就是原分布对应分量的均值和协方差矩阵。
+这一结果就表明，当联合分布为高斯分布时，那么其中一部分随机变量的边缘分布也为高斯分布，并且其均值和协方差矩阵就是原分布对应分量的均值和协方差矩阵。
 
-### 条件分布
 
-获得了 $$p(x)$$ ，我们便可以利用贝叶斯定理，求得条件概率分布
+
+### <span id="cd1case">条件分布——二维情况</span>
+
+现在回到二维分布，获得了 $$p(x)$$ ，我们便可以利用贝叶斯定理，求得条件概率分布
 
 $$
 p(y|x) = \frac{p(x, y)}{p(x)} =\frac{\frac 1 {2\pi \sqrt{|\Sigma|}}\exp(C(x) +C(y)+C) }
-{\frac 1 {2\sqrt{\lambda_{22}\pi|\Sigma|}}\exp(C(x) + C + C_2(x))} \\
-=\sqrt{\frac{\lambda_{22}}{\pi}}\exp(C(y)-C_2(x))
+{\frac 1 {\sqrt{2\lambda_{22}\pi|\Sigma|}}\exp(C(x) + C + C_2(x))} \\
+=\sqrt{\frac{\lambda_{22}}{2\pi}}\exp(C(y)-C_2(x))
 $$
 
 而根据前面对 $$C(y)$$ 配平方的推导
@@ -414,32 +423,198 @@ $$C(y) = -z^2 + C_2(x)$$
 
 $$
 \begin{aligned}
-p(y\mid x) &= \sqrt{\frac {\lambda_{22}}{\pi}}\exp\left(
--\lambda_{22}\left(y - \frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}\right)^2
+p(y\mid x) &= \sqrt{\frac {\lambda_{22}}{2\pi}}\exp\left(
+-\frac{\lambda_{22}}{2}\left(y - \frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}\right)^2
   \right)\\
-  &=\frac{1}{\sqrt{2\pi}\sqrt{\frac{1}{2\lambda_{22}}}} \exp\left(
--\frac{\left(y - \frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}\right)^2}{2 \frac{1}{2\lambda_{22}}}
+  &=\frac{1}{\sqrt{2\pi}\sqrt{\frac{1}{\lambda_{22}}}} \exp\left(
+-\frac{\left(y - \frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}\right)^2}{2 \frac{1}{\lambda_{22}}}
     \right)
 \end{aligned}
 $$
 
-也就是说，*y* 关于 *x* 的条件概率服从均值为 $\frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}$$，方差为 $\frac{1}{2\lambda_{22}}$$ 的高斯分布。
+也就是说，*y* 关于 *x* 的条件概率服从均值为 $\frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}$$，方差为 $\frac{1}{\lambda_{22}}$$ 的高斯分布。
+
+### <span id="cdncase">条件分布——高维情况</span>
+
+然后再看看高维情况
+
+$$
+\begin{aligned}
+
+p(\mathbf{y}\mid \mathbf{x}) &= \frac{p(\mathbf{x}, \mathbf{y})}{p(\mathbf{x})}\\
+&= \frac{
+  \frac{1}{\sqrt{(2\pi)^d |\Sigma|}}\exp(C(\mathbf{x})+C(\mathbf{y})+C)
+  }{
+     \frac 1 {\sqrt{(2\pi)^{d-k} |\Sigma| |\Lambda_{yy}|}}\exp(C(\mathbf{x})+C_2(\mathbf{x})+C)}\\
+     &=\sqrt{\frac{|\Lambda_{yy}|}{(2\pi)^k}}\exp(C(\mathbf{y}) - C_2(\mathbf{x}))\\
+     &=\sqrt{\frac{|\Lambda_{yy}|}{(2\pi)^k}}\exp\left(
+-\frac 1 2 \mathbf{t}^T \Lambda_{yy} \mathbf{t}
+       \right)\\
+       &=\frac{1}{(2\pi)^k |\Lambda_{yy}^{-1}|}\exp\left(
+  -\frac 1 2 ( \mathbf{y} -\Lambda_{yy}^{-1}\mathbf{m})^T (\Lambda_{yy}^{-1})^{-1}(\mathbf{y} -\Lambda_{yy}^{-1}\mathbf{m}))
+         \right)
+  \end{aligned}
+$$
+
+也就是说，条件分布 $$p(\mathbf{y}\mid\mathbf{x})$$ 是以 $$\Lambda_{yy}^{-1}$$ 为协方差矩阵，$$\Lambda_{yy}^{-1} \mathbf{m}$$ 为均值的高斯分布，其中 $$\mathbf{m}^T = \mu_{y}^T \Lambda_{yy} - \mu_x^T \Lambda_{xy} + \mathbf{x}^T \Lambda_{xy}$$。
+
+这里我们总结一下，如果两个随机向量 $$\mathbf{x},  \mathbf{y}$$ 的联合分布 $$p(\mathbf{x},\mathbf{y})$$ 为多元高斯分布，并假设它的均值和协方差矩阵分别具有下面的分块形式
+
+$$
+\mu = \left(\begin{aligned}
+\mu_x\\
+\mu_y
+\end{aligned}\right)
+$$
+
+$$
+\Sigma = \left[
+\begin{aligned}
+\Sigma_{xx} &\quad\Sigma_{xy}\\
+\Sigma_{yx} &\quad\Sigma_{yy}
+\end{aligned}
+\right]
+$$
+
+并且为了表达上的方便，还定义了协方差矩阵的逆矩阵
+
+$$
+\Sigma^{-1} = \left[
+\begin{aligned}
+\Lambda_{xx} &\quad\Lambda_{xy}\\
+\Lambda_{yx} &\quad\Lambda_{yy}
+\end{aligned}
+\right]
+$$
+
+当然协方差矩阵和逆矩阵的分块矩阵存在下述关系
+
+$$
+\left[
+\begin{aligned}
+\Lambda_{xx} &\quad\Lambda_{xy}\\
+\Lambda_{yx} &\quad\Lambda_{yy}
+\end{aligned}
+\right] = \left[
+\begin{aligned}
+\Sigma_{xx}^{-1}+\Sigma_{xx}^{-1} \Sigma_{xy} M \Sigma_{yx} \Sigma_{xx}^{-1} & \quad - \Sigma_{xx}^{-1} \Sigma_{xy}M\\
+-M\Sigma_{yx} \Sigma_{xx}^{-1}  & \quad M
+\end{aligned}
+\right]
+$$
+
+其中 $$M = (\Sigma_{yy} - \Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy})^{-1}$$。有了上面这些知识，我们便可写出边缘分布的形式
+
+$$
+\mathbf{x} \sim N(\mu_x, \Sigma_{xx})
+$$
+
+以及条件分布的形式
+
+$$
+\mathbf{y}\mid \mathbf{x} \sim N(\Lambda_{yy}^{-1} \mathbf{m},\,\Lambda_{yy}^{-1})
+$$
+
+当然 $$\mathbf{y}$$ 和 $$\mathbf{x}\mid\mathbf{x}$$ 的分布形式只需作稍微的参数调换，本质都一样，这里不再赘述。
+
+### <span id="cd-">从条件分布到联合分布</span>
+
+在前面，我们将随机向量拆分成了两部分，推导了它们的联合分布为多元高斯分布情况下的边缘分布和条件分布公式，发现仍然是高斯分布，并且均值和协方差矩阵都能通过联合分布的相关参数计算。
+
+接下来，我们将这个过程反过来，通过两个随机向量的条件分布以及其中一个向量的边缘分布，来计算它们的联合分布，以及另一个随机向量的边缘分布。
+
+我们假设随机向量 $$\mathbf{x}$$ 的维度为 *s*， 服从高斯分布 $$N(\mu_x, \Sigma_{x})$$，随机向量 $$\mathbf{y}$$ 的维度为 *k*，并且关于 $$\mathbf{x}$$ 的条件分布服从高斯分布 $$N(\mu_{y\mid x}, \Sigma_{y\mid x})$$。考虑到前面我们在根据联合分布推导条件分布时得到的结果，$$p(\mathbf{y}\mid\mathbf{x})$$ 的均值
+
+$$
+\Lambda_{yy}^{-1}\mathbf{m} = \Lambda_{yy}^{-1}\Lambda_{yy}^T \mu_{y}-  \Lambda_{yy}^{-1}\Lambda_{xy}^T \mu_x +\Lambda_{yy}^{-1}\Lambda_{xy}^T \mathbf{x}
+$$
+
+也就是说条件分布的均值为 $$\mathbf{x}$$ 的线性函数，于是我们进一步假设
+
+$$
+\mu_{y \mid x} = A \mathbf{x} + b
+$$
+
+其中 *A* 为 *k x s* 矩阵。利用这一关系，通过下面的公式计算联合分布
+
+$$
+\begin{aligned}
+p(\mathbf{x}, \mathbf{y}) &= p(\mathbf{y}\mid \mathbf{x})p(\mathbf{x}) \\
+&=\frac 1 {\sqrt{(2\pi)^k |\Sigma_{y\mid x}|}}\exp\left(
+-\frac 1 2 (\mathbf{y} - A \mathbf{x} - b)^T\Sigma_{y\mid x}^{-1}(\mathbf{y} - A \mathbf{x} - b)
+  \right)
+  \\
+  &\cdot \frac 1 {\sqrt{(2\pi)^{d-k} |\Sigma_{x}|}}\exp\left(
+  -\frac 1 2 (\mathbf{x} - \mu_{x})^T\Sigma_{x}^{-1}(\mathbf{x} - \mu_{x})
+    \right)
+\end{aligned}
+$$
+
+为了方便起见，现在我们单独考虑上式的指数项，由于指数函数的乘法等于底数不变，指数项相加。
+
+$$
+\begin{aligned}
+&-\frac 1 2 (\mathbf{y} -A \mathbf{x} - b)^T\Sigma_{y\mid x}^{-1}(\mathbf{y} - A \mathbf{x} - b)  -\frac 1 2 (\mathbf{x} - \mu_{x})^T\Sigma_{x}^{-1}(\mathbf{x} - \mu_{x})\\
+&=-\frac 1 2 \left(
+\mathbf{x}^T\Sigma_{x}^{-1}\mathbf{x}
+-\mathbf{x}^T\Sigma_{x}^{-1}\mu_x
+-\mu_x^T\Sigma_{x}^{-1}\mathbf{x}
++\mu_x^T\Sigma_{x}^{-1} \mu_x\\
++ \mathbf{y}^T\Sigma_{y\mid x}^{-1}\mathbf{y}
+-\mathbf{y}^T\Sigma_{y\mid x}^{-1}(A \mathbf{x} + b)
+-(A \mathbf{x} + b)^T\Sigma_{y\mid x}^{-1}\mathbf{y}\\
++(A \mathbf{x} + b)^T\Sigma_{y\mid x}^{-1} (A \mathbf{x} + b)
+  \right)\\
+  &=-\frac 1 2 \left(
+\mathbf{x}^T (\Sigma_x^{-1}+A^T \Sigma_{y\mid x}^{-1}A) \mathbf{x}
+- \mathbf{x}^T (\Sigma_x^{-1}\mu_x - A^T \Sigma_{y\mid x}^{-1}b)\\
+- (\mu_x^T \Sigma_x^{-1}-b^T \Sigma_{y\mid x}^{-1}A)\mathbf{x}
+- \mathbf{y}^T \Sigma_{y\mid x}^{-1}A \mathbf{x}
+-\mathbf{x}^T  A^T \Sigma_{y\mid x}^{-1}\mathbf{y}\\
+-\mathbf{y}^T \Sigma_{y\mid x}^{-1} b
+-b^T \Sigma_{y\mid x}^{-1} \mathbf{y}
++\mathbf{y}^T\Sigma_{y\mid x}^{-1}\mathbf{y}
++\mu_x^T\Sigma_{x}^{-1} \mu_x
++b^T\Sigma_{y\mid x}^{-1} b
+    \right)\\
+    &=-\frac 1 2\left(
+      \mathbf{x}^T (\Sigma_x^{-1}+A^T \Sigma_{y\mid x}^{-1}A) \mathbf{x}
+-\mathbf{x}^T  A^T \Sigma_{y\mid x}^{-1}\mathbf{y}\\
+-\mathbf{y}^T \Sigma_{y\mid x}^{-1}A \mathbf{x}
+ +\mathbf{y}^T\Sigma_{y\mid x}^{-1}\mathbf{y}\\
+-2\mathbf{x}^T \Sigma_x^{-1}\mu_x
++ 2\mathbf{x}^T A^T \Sigma_{y\mid x}^{-1} b
+- 2\mathbf{y}^T \Sigma_{y\mid x}^{-1} b\\
++ \mu_x^T\Sigma_{x}^{-1} \mu_x
++ b^T\Sigma_{y\mid x}^{-1} b
+      \right)\\
+    &=- \frac 1 2 (\mathbf{x}^T \quad \mathbf{y}^T)
+    \left[
+    \begin{aligned}
+    \Sigma_x^{-1}+A^T \Sigma_{y\mid x}^{-1}A & \quad -A^T \Sigma_{y\mid x}^{-1}\\ -\Sigma_{y\mid x}^{-1}A&\quad\Sigma_{y\mid x}^{-1}
+    \end{aligned}
+            \right]
+            \left(
+            \begin{aligned}
+            \mathbf{x}\\\mathbf{y}
+            \end{aligned}
+                    \right)\\
+                    &+(\mathbf{x}^T\quad \mathbf{y}^T)
+                    \left(
+            \begin{aligned}
+            \Sigma_{y\mid x}^{-1}\mu_x - A^T \Sigma_{y\mid x}^{-1} b\\
+            \Sigma_{y\mid x}^{-1} b
+            \end{aligned}
+                    \right)
+\end{aligned}
+$$
 
 
 
 
+end
 
-
-
-
-
-
-
-
-
-
-
-
+end
 
 end
 
