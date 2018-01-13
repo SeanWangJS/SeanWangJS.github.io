@@ -8,6 +8,7 @@ layout: default
 * [边缘分布——高维情况](#dncase)
 * [条件分布——二维情况](#cd1case)
 * [条件分布——高维情况](#cdncase)
+* [从条件分布到联合分布](#cd-2)
 
 最初，均值为 $$\mu$$ ，协方差矩阵为 $$\Sigma$$ 的多元高斯分布具有如下形式
 
@@ -432,7 +433,7 @@ p(y\mid x) &= \sqrt{\frac {\lambda_{22}}{2\pi}}\exp\left(
 \end{aligned}
 $$
 
-也就是说，*y* 关于 *x* 的条件概率服从均值为 $\frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}$$，方差为 $\frac{1}{\lambda_{22}}$$ 的高斯分布。
+也就是说，*y* 关于 *x* 的条件概率服从均值为 $$\frac{\lambda_{22}\mu_2 + \lambda_{12}x -\lambda_{12}\mu_1}{\lambda_{22}}$$，方差为 $\frac{1}{\lambda_{22}}$$ 的高斯分布。
 
 ### <span id="cdncase">条件分布——高维情况</span>
 
@@ -517,7 +518,7 @@ $$
 
 当然 $$\mathbf{y}$$ 和 $$\mathbf{x}\mid\mathbf{x}$$ 的分布形式只需作稍微的参数调换，本质都一样，这里不再赘述。
 
-### <span id="cd-">从条件分布到联合分布</span>
+### <span id="cd-2">从条件分布到联合分布</span>
 
 在前面，我们将随机向量拆分成了两部分，推导了它们的联合分布为多元高斯分布情况下的边缘分布和条件分布公式，发现仍然是高斯分布，并且均值和协方差矩阵都能通过联合分布的相关参数计算。
 
@@ -544,7 +545,7 @@ p(\mathbf{x}, \mathbf{y}) &= p(\mathbf{y}\mid \mathbf{x})p(\mathbf{x}) \\
 -\frac 1 2 (\mathbf{y} - A \mathbf{x} - b)^T\Sigma_{y\mid x}^{-1}(\mathbf{y} - A \mathbf{x} - b)
   \right)
   \\
-  &\cdot \frac 1 {\sqrt{(2\pi)^{d-k} |\Sigma_{x}|}}\exp\left(
+  &\cdot \frac 1 {\sqrt{(2\pi)^s |\Sigma_{x}|}}\exp\left(
   -\frac 1 2 (\mathbf{x} - \mu_{x})^T\Sigma_{x}^{-1}(\mathbf{x} - \mu_{x})
     \right)
 \end{aligned}
@@ -585,8 +586,8 @@ $$
 -2\mathbf{x}^T \Sigma_x^{-1}\mu_x
 + 2\mathbf{x}^T A^T \Sigma_{y\mid x}^{-1} b
 - 2\mathbf{y}^T \Sigma_{y\mid x}^{-1} b\\
-+ \mu_x^T\Sigma_{x}^{-1} \mu_x
-+ b^T\Sigma_{y\mid x}^{-1} b
+-\frac 1 2 \mu_x^T\Sigma_{x}^{-1} \mu_x
+-\frac 1 2 b^T\Sigma_{y\mid x}^{-1} b
       \right)\\
     &=- \frac 1 2 (\mathbf{x}^T \quad \mathbf{y}^T)
     \left[
@@ -602,30 +603,100 @@ $$
                     &+(\mathbf{x}^T\quad \mathbf{y}^T)
                     \left(
             \begin{aligned}
-            \Sigma_{y\mid x}^{-1}\mu_x - A^T \Sigma_{y\mid x}^{-1} b\\
+            \Sigma_x^{-1}\mu_x - A^T \Sigma_{y\mid x}^{-1} b\\
             \Sigma_{y\mid x}^{-1} b
             \end{aligned}
                     \right)
+                    -\frac 1 2 \mu_x^T\Sigma_{x}^{-1} \mu_x
+                    -\frac 1 2 b^T\Sigma_{y\mid x}^{-1} b\\
+                    &= -\frac 1 2 \mathbf{z}^T R \mathbf{z} + \mathbf{z}^T S + C
 \end{aligned}
 $$
 
+公式的最后我们定义了一些符号以简化表达，然后再使用待定系数法对上式结果配平方
 
+$$
+\begin{aligned}
+-\frac 1 2 \mathbf{z}^T R \mathbf{z} + \mathbf{z}^T S + C
+&= -\frac 1 2 (\mathbf{z} - a)^T R (\mathbf{z} - a) + e\\
+&= -\frac 1 2 \mathbf{z}^T R \mathbf{z} + \mathbf{z}^T Ra - \frac 1 2 a^T R a + e
+\end{aligned}
+$$
 
+根据上式中的对应项相等，我们可以得到待定系数的值
 
-end
+$$
+a = R^{-1} S\\
+e = \frac 1 2 S^T R^{-1} S + C
+$$
 
-end
+利用分块矩阵的逆矩阵公式
 
-end
+$$
+\left[
+\begin{aligned}
+A \quad & B\\
+C \quad & D
+\end{aligned}
+\right]
+=
+\left[
+\begin{aligned}
+M_z^{-1} \quad & - M_z B D ^{-1}\\
+-D^{-1} CM_z \quad & D^{-1} + D^{-1} C M^{-1} B D^{-1}
+\end{aligned}
+\right]
+$$
 
+其中 $$M = A - B D^{-1} C$$。可以得到 $$R^{-1}$$ 如下
 
+$$
+R^{-1} = \left[
+\begin{aligned}
+\Sigma_x \quad & \Sigma_x A^T\\
+A \Sigma_x \quad & \Sigma_{y\mid x} + A \Sigma_x A^{T}
+\end{aligned}
+\right]
+$$
 
-end
+然后再具体计算 *a e* 得到
 
+$$
+a = \left(
+\begin{aligned}
+&\mu_x \\ A \mu_x &+ b
+\end{aligned}
+\right)\\
+e= 0 \qquad \qquad \,  \, \,
+$$
 
+所以我们看到，联合分布的指数项其实是一个完全平方项，所以
 
-end
+$$
+p(\mathbf{x}, \mathbf{y}) = \frac 1 {\sqrt{(2\pi)^{k+s} |\Sigma_{y\mid x}||\Sigma_x|}}\exp\left(-\frac 1 2(\mathbf{z} - a)^T R (\mathbf{z} - a)\right)
+$$
 
+根据逆分块矩阵的行列式表达式
 
+$$
+\left|
+\begin{aligned}
+A&\quad B\\
+C&\quad D
+\end{aligned}
+  \right|^{-1} = |D - C A^{-1} B||A|
+$$
 
-end
+可以得到 $$R^{-1}$$ 的行列式
+
+$$
+R^{-1} = |\Sigma_{y\mid x} + A \Sigma_x A^T  - A \Sigma_x \Sigma_x^{-1} \Sigma_x A^T ||\Sigma_x| = |\Sigma_{y\mid x}||\Sigma_x|
+$$
+
+所以联合分布的表达式就为
+
+$$
+p(\mathbf{x}, \mathbf{y}) = \frac 1 {\sqrt{(2\pi)^{k+s} |R^{-1}|}}\exp\left(-\frac 1 2(\mathbf{z} - a)^T R (\mathbf{z} - a)\right)
+$$
+
+也就是说 $$\mathbf{x}, \mathbf{y}$$ 的联合分布是一个均值为 $$a$$，协方差矩阵为 $$R^{-1}$$ 的多元高斯分布。再结合前面通过联合分布求边缘分布和条件分布的讨论，可知随机向量 $$\mathbf{y}$$ 服从高斯分布，以及 $$\mathbf{x}$$ 关于 $$\mathbf{y}$$ 的条件分布也是高斯分布。
