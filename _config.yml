@@ -6,7 +6,7 @@ email: clouswang@gmail.com
 avatar: assets/images/avatar.png
 github_url: https://github.com/SeanWangJS
 show_downloads: true
-google_analytics:
+google_analytics: UA-112476045-1
 theme: jekyll-theme-prologue
 collections: [sections]
 port: 4000
