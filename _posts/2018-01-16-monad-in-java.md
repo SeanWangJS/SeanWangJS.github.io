@@ -1,9 +1,7 @@
 ---
-layout: default
+layout: post
+title: 在 Java 中实现 Monad
 ---
-
-
-## 在 Java 中实现 Monad
 
 ### 少量预备知识
 

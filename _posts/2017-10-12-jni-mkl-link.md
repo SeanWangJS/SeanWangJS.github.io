@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: Java 本地调用连接 Intel 数学核心库
 ---
-
-## Java 本地调用连接 Intel 数学核心库(MKL)
 
 ```
 javac .\jblas\src\main\java\com\haswalk\jblas\JBlas.java -h .\jblas\src\main\java\com\haswalk\jblas\lib

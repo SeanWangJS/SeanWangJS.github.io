@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: C语言编译与 intel MKL 连接
 ---
-
-## C语言编译与 intel MKL 连接
 
 ### C语言编译过程
 

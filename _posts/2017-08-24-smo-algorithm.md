@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: SMO 算法介绍
 ---
-
-### SMO 算法
 
 根据前面对支持向量机的介绍，需要求解的优化问题为
 

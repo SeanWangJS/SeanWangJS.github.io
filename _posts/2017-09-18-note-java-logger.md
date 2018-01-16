@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 笔记--Java Logger
 ---
-
-## 笔记：Java Logger
 
 使用日志，首先就是要拿到日志对象，然后再指定日志文件存储路径嘛。不知道怎地，搞半天没在网上找到一篇关于怎么通过配置文件指定日志存储目录的文章。最后发现这篇博文 [Java Logging: Handlers](http://tutorials.jenkov.com/java-logging/handlers.html) 才搞定这个问题。
 

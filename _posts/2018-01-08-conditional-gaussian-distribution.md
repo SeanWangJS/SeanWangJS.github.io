@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 条件高斯分布
 ---
-
-## 条件高斯分布
 
 * [边缘分布——二维情况](#d1case)
 * [边缘分布——高维情况](#dncase)

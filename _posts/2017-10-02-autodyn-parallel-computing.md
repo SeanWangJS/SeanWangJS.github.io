@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: AUTODYN 并行计算（单机）
 ---
-
-## AUTODYN 并行计算（单机）
 
 使用多核 CPU 来加速 AUTODYN 计算是一个行之有效的方法，而且设置也相当简单，这里稍微记录一下。
 

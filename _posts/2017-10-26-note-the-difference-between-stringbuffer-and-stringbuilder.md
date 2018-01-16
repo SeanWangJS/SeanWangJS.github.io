@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 笔记-Java(JDK 1.9) StringBuffer 与 StringBuilder 的区别
 ---
-
-## Note: Java(JDK 1.9) StringBuffer 与 StringBuilder 的区别
 
 StringBuffer 与 StringBuilder 都是为了更高效的操纵字符串而生，原因在于 String 类是不可变量，对其进行任何修改都会产生新的对象，而 StringBuffer 和 StringBuilder 则能够有效避免这一问题。但既然区分了两个类，就说明它们之间存在差别。
 

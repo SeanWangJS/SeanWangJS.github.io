@@ -1,9 +1,7 @@
 ---
-layout: default
+layout: post
+title: 最速下降法解线性方程组
 ---
-
-## 最速下降法解线性方程组
-
 
 ### 算法推导
 

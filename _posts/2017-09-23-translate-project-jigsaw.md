@@ -1,10 +1,9 @@
 ---
-layout: default
+layout: post
+title: Jigsaw 项目--模块系统快速导引（中文翻译）
 ---
 
 原文地址：[Project Jigsaw: Module System Quick-Start Guide](http://openjdk.java.net/projects/jigsaw/quick-start)。
-
-## Jigsaw 项目：模块系统快速导引（中文翻译）
 
 本文为了开发者快速入门 Java 模块化而介绍几个简单的例子。
 

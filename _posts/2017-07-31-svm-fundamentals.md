@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 支持向量机基础知识 
 ---
-
-## 支持向量机
 
 考虑属于两个类别的样本集合
 

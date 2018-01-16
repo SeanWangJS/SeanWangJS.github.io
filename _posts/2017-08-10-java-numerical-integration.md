@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 数值积分 Java 实现
 ---
-
-## 数值积分 Java 实现
 
 之前在SICP上看到一个很厉害的东西，考虑三个问题：
 1. 计算从 a 到 b 间所有整数的和

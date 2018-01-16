@@ -1,8 +1,7 @@
 ---
-layout: default
+layout: post
+title: 问题：零钱兑换
 ---
-
-## 问题：零钱兑换
 
 ### 问题描述与分析
 
