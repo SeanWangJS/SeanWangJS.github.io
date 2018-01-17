@@ -98,12 +98,12 @@
 	}
 
 	h2 {
-		font-size: 1.5em;
+		font-size: 1.3em;
 		letter-spacing: -1px;
 	}
 
 	h3 {
-		font-size: 1.2em;
+		font-size: 1.1em;
 	}
 
 	header {
@@ -580,8 +580,11 @@
 
 			li {
 				a {
+					&.scrolly{
+						text-align: right;
+					}
 					display: block;
-					padding: 0.5em 1.5em 0.5em 1.5em;
+					padding: 0.3em 1.0em 0.5em 1.0em;
 					color: rgba(255, 255, 255, 0.5);
 					text-decoration: none;
 					outline: 0;
@@ -652,7 +655,8 @@
 	#main {
 		margin-left: 375px;
 		p {
-			font-size: 0.9em
+			font-size: 0.9em;
+			line-height: 1.5em
 		}
 		> section {
 			text-align: center;

@@ -3,7 +3,7 @@ title: 阅读清单
 subtitle: 最近在看的一些书籍
 layout: "page"
 icon: fa-book
-order: 3
+order: 2
 ---
 
 1. 周志荣: *深入理解Java虚拟机——JVM高级特性与最佳实践*

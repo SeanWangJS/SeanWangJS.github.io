@@ -1,0 +1,15 @@
+---
+layout: default
+---
+{%- assign _archives = site.archives | sort: 'order' -%}
+{%- include header.html scrolly_nav=_archives -%}
+<!-- Main -->
+<div id="main">
+	{%- if page.content != "" -%}
+		{%- include archive.html title=page.title photo=page.cover-photo photo-alt=page.cover-photo-alt auto-header=page.auto-header content=page.content -%}
+	{%- endif -%}
+	<!-- Sections -->
+	{%- for _archive in _archives -%}
+		{%- include archive.html title="" photo=_archive.cover-photo photo-alt=_archive.cover-photo-alt auto-header=_archive.auto-header content=_archive.content -%}
+	{%- endfor -%}
+</div>

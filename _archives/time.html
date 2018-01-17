@@ -1,0 +1,19 @@
+---
+title: 按时间归档
+icon: fa-calendar-times-o
+order: 1
+---
+{%- assign _posts = site.posts | sort: 'date' | reverse -%}
+{%- assign _dates = _posts | map: 'date' -%}
+
+<h3 style="text-align: left">按时间归档</h3>
+<ul>
+
+
+
+	{%- for _date in _dates -%}
+		<li style="text-align: left">
+			{{- _date | slice: 0,7 -}} 
+		</li>
+	{%- endfor -%}
+</ul>

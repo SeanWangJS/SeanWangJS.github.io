@@ -6,6 +6,6 @@ avatar: assets/images/avatar.png
 github_url: https://github.com/SeanWangJS
 google_analytics: UA-112476045-1
 theme: jekyll-theme-prologue
-collections: [sections]
+collections: [sections, archives]
 port: 4000
 JEKYLL_ENV: production
