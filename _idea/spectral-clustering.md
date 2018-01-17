@@ -188,16 +188,19 @@ Ratiocut(A, B) = \frac 1 {2 (a+b)}  \left(
   =\frac{1}{2(a+b)}\sum_{i = 1}^n \sum_{j=1}^n w_{ij}(f_i - f_j)^2
 $$
 
-再根据
+下面单独计算求和项
 
 $$
 \begin{aligned}
 \sum_{i = 1}^n \sum_{j=1}^n w_{ij}(f_i - f_j)^2 &= \sum_{i  =1}^n\sum_{j=1}^n w_{ij}f_i^2 + \sum_{i  =1}^n\sum_{j=1}^n w_{ij}f_j^2
 -2\sum_{i  =1}^n\sum_{j=1}^n w_{ij}f_i f_j\\
 &=\sum_{i=1}^n d_i f_i^2 + \sum_{j=1}^n d_j f_j^2 -2\mathbf{f}^T W \mathbf{f}\\
-&=2 \mathbf{f}^T (D- W)\mathbf{f}
+&=2 \mathbf{f}^T (D- W)\mathbf{f}\\
+&=2 \mathbf{f}^T L\mathbf{f}
 \end{aligned}
 $$
+
+其中 $$L = D - W$$ 称为拉普拉斯矩阵。（注意使用上式的逆过程，我们可以看到，存在非零向量 $$\mathbf{z}$$ 使得 $$\mathbf{z^T} L \mathbf{z} = \sum_{i=1}^n \sum_{i=1}^nw_{ij}(z_i-z_j)^2$$，也即是说 *L* 是一个对称半正定矩阵 ）
 
 于是
 
@@ -205,17 +208,68 @@ $$
 Ratiocut(A, B) = \frac {1}{a+b} \mathbf{f}^T (D- W)\mathbf{f} = \frac {1}{a+b} \mathbf{f}^T L\mathbf{f}
 $$
 
-其中 $$L = D - W$$ 称为拉普拉斯矩阵。
+可以看到，对 *Ratiocut* 的最小化等价于对 $$\mathbf{f}^T L \mathbf{f}$$ 的最小化。其中的拉普拉斯矩阵直接与相似矩阵相关，从而与数据点的分布相关，而根据 $$\mathbf{f}$$ 的定义，它必须满足约束
+
+$$
+\|\mathbf{f}\|^2 = \mathbf{f}^T \mathbf{f}=\sum_{i=1}^n f_i^2=\sum_{i=1}^a \frac b a + \sum_{i=1}^b \frac a b = n\\
+\mathbf{f}^T E = \sum_{i=1}^n f_i = 0
+$$
+
+其中 *E* 为所有元素都是 1 的向量。
+
+通过以上公式的推导，我们看到需要优化的问题为
+
+$$
+\min_{f}\quad \mathbf{f}^T L \mathbf{f} \\
+s.t. \quad \|\mathbf{f}\| = \sqrt{n}\,,\quad \mathbf{f}^T E =0
+$$
+
+并且 **f** 中的分量还要满足它本身的定义，即为二值量——$$\sqrt{\frac b a}$$ 或者 $$-\sqrt{\frac a b}$$。但是这样一来，我们就得到了一个 NP 难的问题，所以我们先放宽一下条件，允许 **f** 取任意值。于是问题可以转化成下面的形式
+
+$$
+\min_{f}\frac{ \mathbf{f}^T L \mathbf{f}}{\mathbf{f}^T \mathbf{f}} \\
+s.t. \quad \|\mathbf{f}\| = \sqrt{n}\,,\quad \mathbf{f}^T E =0
+$$
+
+这里的优化函数是一个瑞利商，根据我们以前的文章对瑞利商的介绍，它的极小值等于 *L* 的最小特征值。而根据公式
+
+$$
+\mathbf{z}^TL \mathbf{z} = \sum_{i=1}^{n}\sum_{j=1}^n w_{ij}(z_i - z_j)^2
+$$
+
+可以发现，当向量 *z* 的每一个分量的值都相等时，$$\mathbf{z}^TL \mathbf{z}$$ 取得最小值 0 ，设 $$\lambda_1$$ 为 *L* 的最小特征值，那么有
+
+$$
+\mathbf{z}^TL \mathbf{z} = \lambda_1 \mathbf{z}^T \mathbf{z}=0
+$$
+
+由于 *z* 是一个非零向量，所以必然有 $$\lambda_1 = 0$$ ，即 *L* 的最小特征值等于 0，那么是不是说瑞利商 $$\frac{ \mathbf{f}^T L \mathbf{f}}{\mathbf{f}^T \mathbf{f}} $$ 的极小值就等于 0 呢？这显然是不对的，因为那样的话就必须使得向量 $$\mathbf{f}$$ 的各个分量相等，这违背它了的第二个约束条件 $$\mathbf{f}^T E = 0$$。
+
+既然 *L* 的最小特征值不能作为解，那么我们可以退一步将它第二小特征值作为优化解，此时的 **f** 是 *L* 的第二特征向量。然后我们可以将 **f** 的各个分量看作实数域上的点，对这些点进行二值 k 聚类，得到结果
+
+$$
+f_i \in C_1 \| f_i \in C_2 \,,\quad i = 1,2,..,n
+$$
+
+最后再对原数据点进行聚类
+
+$$
+x_i \in \left\{\begin{aligned}
+A\quad f_i \in C_1\\
+B\quad f_i \in C_2
+\end{aligned}\right.
+\quad for \,\, all \,\,x_i \in V
+$$
 
 
 
 
 
 
+end
 
+end
 
-
-
-
+end
 
 end

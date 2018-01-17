@@ -1,11 +1,9 @@
 title: Fenrier Lab
 subtitle: A Blog to Record and Share.
-description: A Blog to Record and Share.
 author: SeanWang
 email: clouswang@gmail.com
 avatar: assets/images/avatar.png
 github_url: https://github.com/SeanWangJS
-show_downloads: true
 google_analytics: UA-112476045-1
 theme: jekyll-theme-prologue
 collections: [sections]
