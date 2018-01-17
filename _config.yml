@@ -8,3 +8,4 @@ google_analytics: UA-112476045-1
 theme: jekyll-theme-prologue
 collections: [sections]
 port: 4000
+JEKYLL_ENV: production

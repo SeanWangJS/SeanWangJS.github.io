@@ -1,8 +1,16 @@
 <head>
-  {%- if site.google_analytics and jekyll.environment == 'production' -%}
+  <!--{%- if site.google_analytics and jekyll.environment == 'production' -%}-->
     {%- include google_analytics.html -%}
-  {%- endif -%}
-  
+  <!--{%- endif -%}-->
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{- site.google_analytics -}}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{- site.google_analytics -}}');
+</script>
+
   <!-- Robots -->
   <meta name="robots" content="{{- page.robots | default: 'index, follow' -}}" />
   {%- unless page.canonical == false -%}<link rel="canonical" href="{{- page.url | absolute_url -}}" />{%- endunless -%}

@@ -4,6 +4,6 @@
 # See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 layout: home
 title: 关于
-icon: fa-about
+icon: fa-user
 order: 3
 ---
