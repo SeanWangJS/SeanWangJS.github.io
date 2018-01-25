@@ -1,43 +1,126 @@
 ---
 layout: post
-title: MKL 向量统计库 VSL 中的数据索引问题
+title: MKL 向量统计库 VSL 中的数据存储与索引风格的应用
 ---
 
-由于 MKL 支持 C 与 Fortran 两种数据索引风格，在使用 VSL 进行统计计算的时候，可以使用参数 VSL_SS_MATRIX_STORAGE_ROWS 和 VSL_SS_MATRIX_STORAGE_COLS 来指定我们传入的数据布局为行索引或者列索引。但是我们一般习惯的是类 C 语言的行索引风格，所以这篇文章就来讨论一下如何使用 VSL 这两种风格的适当组合来适配矩阵统计量的计算。
+由于 MKL 支持两种数据存储方式，在使用 VSL 进行统计计算的时候，可以使用参数 VSL_SS_MATRIX_STORAGE_ROWS 和 VSL_SS_MATRIX_STORAGE_COLS 来指定我们传入的数据布局为行存储或者列存储。但是我们一般习惯的是类 C 语言的行索引风格，所以这篇文章就来讨论一下如何使用 VSL 这两种风格的适当组合来适配计算矩阵的统计量。
 
-### C 风格与 Fortran 风格的数据索引方式
+### 一些约定
 
-首先来看一下什么是 C 风格与 Fortran 风格的数据索引。内存可以被认为是一种一维结构，只需要知道一个索引号就能取出里面的数据，但实际问题中很多数据都是二维的，比如矩阵存储的数据。为了将现实问题中的数据存到内存里面，以及从内存里面提取数据，我们需要对两者建立映射关系，这个映射公式就是区分两种索引风格的依据，比如这段数据
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/raw.png)
-
-假设它代表的实际数组是下面这样的
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/row.png)
-
-这个二维数组索引 (i,j) 映射到内存块中的索引为 i * 5 + j，其中的 5 是子数组的长度，而这种索引风格就是类 C 的。而同样的数组如果用 Fortran 风格的索引来表示，则相当于把 C 风格的数组给转置一下
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/column.png)
-
-这时二维数组索引 (i,j) 上的数据在内存中的索引为 j * 5 + i。值得注意的是，数组的索引风格不取决于它的形状是横条或者竖条的，而是它的索引映射公式，或者观察它的二维数组视图和内存布局。如果内存中的数据遍历结果与二维数组视图中的横向遍历结果相同，那么就是 C 风格索引，而如果内存中的数据遍历结果与二维数组视图中的竖向遍历结果相同，则是 Fortran 风格的。
-
-为了进一步说明，我们考虑鸢尾花数据集的前 3 个样本
+在写这篇文章的时候我发现很多概念模棱两可，如果不提前做好约定，不仅会让读者不知所云，也让我的思路很乱。这里我先把之后要用到的数据拿出来
 
 ![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris.png)
 
-从这张图我们可以看到，样本的维度 DIM = 4，样本数量 N = 3。但仅通过这个二维数组视图我们并不能判断它是 C 或者 Fortran 风格的，因为两者皆允，若我们认为里面的数据是 C 风格索引的，则在内存中是下面这样的
+这是著名的鸢尾花数据集，为了简便起见，我就只取了前三个样本。当我们要把这堆数据放到程序中的时候，自然会考虑用二维数组来存储
 
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris-c.png)
+$$
+\left[
+\begin{aligned}
+5.1\quad\quad& 3.5& 1.4\quad\quad& 0.2\\
+4.9\quad\quad& 3.1& 1.4\quad\quad& 0.2\\
+4.7\quad\quad& 3.2& 1.3\quad\quad& 0.2
+\end{aligned}
+\right]
+$$
 
-而如果按 Fortran 的列存储风格，则内存中的数据布局如下所示
+我把类似这种形式的表示称为数据的 *二维数组视图*。但我们知道二维数组在内存中其实是一维的，特别是在 C 语言中，子数组之间也没有空隙，于是我们把它的一维表示形式称为数据的 *内存视图*。
 
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris-f.png)
+$$
+[5.1\quad 3.5\quad 1.4\quad 0.2\quad
+4.9\quad 3.1\quad 1.4\quad 0.2\quad
+4.7\quad 3.2\quad 1.3\quad 0.2]
+$$
+
+可以发现，内存视图其实就是把二维数组视图的每个子数组拼接起来形成的，或者说是对二维数组视图按行遍历形成了内存视图。这就启发我们考虑按列遍历二维数组会得到什么？
+
+$$
+[5.1\quad 4.9\quad 4.7\quad
+3.5\quad 3.1\quad 3.2\quad
+1.4\quad 1.4\quad 1.3\quad
+0.2\quad 0.2\quad 0.2]
+$$
+
+其实这也可以看作一个内存视图。也就是说，一个二维数组视图，通过两种遍历方式可以得到两种不同的内存视图。这里我们把对二维数组的按行遍历或者按列遍历统称为 *遍历方向*。
+
+而反过来，从内存视图恢复二维数组视图则要稍微复杂点，首先必须要指定二维数组视图的行数和列数，一般称为 *形状*，然后还需要指定是按列恢复还是按行恢复，比如从 1 到 10 的连续整数列表
+
+$$
+[1\quad 2\quad 3\quad 4\quad 5\quad 6\quad 7\quad 8\quad 9\quad 10]
+$$
+
+若假设二维数组视图的形状为 2行 5列，并且按行连续（这里的连续指的是在内存视图中连续），则从内存视图恢复得到的二维数组为
+
+$$
+\left[\begin{aligned}
+&1\quad 2\quad 3\quad 4\quad 5\quad \\
+&6\quad 7\quad 8\quad 9\quad 10
+\end{aligned}
+\right]
+$$
+
+若按列连续恢复，则相应的二维数组为
+
+$$
+\left[\begin{aligned}
+&1\quad 3\quad 5\quad 7\quad 9\quad \\
+&2\quad 4\quad 6\quad 8\quad 10
+\end{aligned}
+\right]
+$$
+
+而如果二维数组视图的形状为 5行 2列，那么按行连续恢复时
+
+$$
+\left[\begin{aligned}
+&1\quad 2\\& 3\quad 4\\&5\quad 6\\
+& 7\quad 8\\& 9\quad 10
+\end{aligned}
+\right]
+$$
+
+按列连续恢复时
+
+$$
+\left[\begin{aligned}
+&1\quad 6\\
+&2\quad 7\\
+&3\quad 8\\
+&4\quad 9\\
+&5\quad 10
+\end{aligned}
+\right]
+$$
+
+我们这里把按行连续恢复或者按列连续恢复统称为 *恢复方向*。可以看到，同一段内存视图，根据数组形状或恢复方向的不同，能得到多种不同的二维数组视图。
+
+通过以上分析，我们总结出，要从二维数组视图得到明确的内存视图，需要约束遍历方向，而反过来得话，则需要约束恢复方向和形状两个参数。
+
+从另一个方面来看，从二维数组视图到内存视图，是一种存储过程，而从内存视图到二维数组视图，则是一种按索引读取过程。所以遍历方向和恢复方向又分别可以看作存储风格和索引风格，即二维数组视图按行遍历得到内存视图，是行存储风格，按列则是列存储风格，内存视图按行恢复得到二维数组视图，是行索引风格，按列恢复则是列索引风格。
 
 ### 使用 VSL 统计计算
 
 向量统计库设计了一套完整的任务流程API，大致分成三个阶段：新建任务，编辑任务以及计算，分别对应于三个函数 vsl\*NewTask, vsl\*EditTask，vsl*SSCompute 其中的 \* 号可以取 d s i 分别代表双精度浮点数、单精度浮点数以及整数。
 
-现在考虑使用 VSL 计算前面给的鸢尾花数据的一些统计值，来探讨它的内部是如何处理数据布局的，首先来看看每个维度上的均值，代码如下
+现在考虑使用 VSL 计算前面给的鸢尾花数据的一些统计值，来探讨它的内部处理方式，首先我们把数据按行遍历写到一维数组中（即内存视图）
+
+```c
+double matrix[] = {5.1, 3.5, 1.4, 0.2, 4.9, 3.1, 1.4, 0.2, 4.7, 3.2, 1.3, 0.2};
+
+```
+
+然后指定二维数据视图的形状为 3行 4列（这与我们的原始数据相同）
+
+```c
+MKL_INT ROW = 3;
+MKL_INT COL = 4;
+```
+以及从二维数组视图到内存视图的存储方式为行存储
+
+```
+MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_ROWS;
+```
+
+由于还不知道 VSL 内部处理行列风格的原理，我们先做一下实验，完整代码如下
 
 ```c
 //main.c
@@ -48,17 +131,17 @@ int main()
 {
     /* 数组定义 \*/
 	  double matrix[] = {5.1, 3.5, 1.4, 0.2, 4.9, 3.1, 1.4, 0.2, 4.7, 3.2, 1.3, 0.2};
-	  MKL_INT DIM = 4;
-    MKL_INT N = 3;
-    MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_COLS; //使用 Fortran 的列索引风格
+	  MKL_INT ROW = 3;
+    MKL_INT COL = 4;
+    MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_ROWS;
 
     VSLSSTaskPtr task;
-    double mean[DIM];
+    double mean[COL];
     int errcode;
     unsigned MKL_INT64 estimate = VSL_SS_MEAN;
 
     // 新建任务：导入数组描述
-    errcode = vsldSSNewTask( &task, &DIM, &N, &x_storage, (double*)matrix, 0, 0 );
+    errcode = vsldSSNewTask( &task, &ROW, &COL, &x_storage, (double*)matrix, 0, 0 );
     // 编辑任务：设定任务为均值计算
     errcode = vsldSSEditTask( task, VSL_SS_ED_MEAN, mean);
     // 开始计算任务
@@ -76,136 +159,81 @@ compile command:
 gcc -c main.c -o target.o -I "%MKL_ROOT%\include"
 gcc -o target.exe target.o -L "%MKL_ROOT%\lib\intel64_win" -lmkl_rt
 */
-//4.900000,3.266667,1.366667,0.200000
+//2.550000,2.400000,2.350000,0.000000
 ```
 
-代码中的 matrix[] 数组就是数据在内存中的存储方式，仅需要一个索引号即可定位数据。然后通过指定数据的存储风格为列存储
+上述代码是想计算矩阵中的行或列的均值，但是由于不知道 VSL 实际会计算行的均值还是列的均值，所以我们令数组 mean 的长度为较大的那一个，即 COL。通过结果我们看到，它计算的是行均值。
 
-```c
-MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_COLS;
-```
+结合我们的参数设定，可以猜想，上述代码计算的是：依据形状和存储风格，从内存视图中恢复出来的二维数组视图的行均值。
 
-此时数据的二维视图如下图所示
+![](/resources/2018-01-21-data-layout-in-mkl-vsl/workflow.png)
+（数据变换流程）
 
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris-f2.png)
-
-然后指定样本的维度 DIM = 4， 数量 N = 3，最后正确计算出了每个维度上的均值。
-
-我们可以猜测一下 VSL 内部是如何进行计算的，首先从第 0 个元素开始，以 DIM 为间隔跳跃 N - 1 次，对所到数据进行求和，最后求平均
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/mean1.png)
-
-然后从第 1 个元素开始，做相同的计算
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/mean2.png)
-
-直到达到第 DIM 个元素
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/meann.png)
-
-最后将所求均值填充到数组 mean 所对应的内存。
-
-如果我们在指定数组存储风格的时候，将代码替换为
+既然如此，我们就可以进一步猜想，要计算某一矩阵的列均值，只需要让 VSL 中的二维数组视图是原始矩阵的转置即可。但是这里还有一个不清楚的地方，我们指定矩阵的存储方式那行代码
 
 ```c
 MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_ROWS;
 ```
+它是作用在哪个位置的？是从概念形式到代码形式那里，还是从代码形式到 VSL 那里？或者两者皆有？
 
-这时数组的二维视图如下
+如果它是作用在概念形式到代码形式那里的话，那么只要改变 x_storage 的值，我们的 matrix 数组就必须变化，因为概念形式是固定的，行存储或列存储得到的内存视图就会不一样。
 
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris.png)
+然而 matrix 数组是否能够随意变化呢？这就要看 matrix 数组是从哪里来的了。很明显，matrix 数组是我们自己给的，如果有一个函数 mean()，那么 matrix 就是其中一个参数，如果它在 mean 函数内部转置一次，那为何我们不在函数外部对它转置再传进来，偏偏要增加 mean 函数的计算开销。所以我们不希望 matrix 在这里发生任何变化。
 
-如果其他代码不变，我们将得到如下结果
+于是可以认为 x_storage 是作用在代码形式—— VSL 过程，但如果是顺序过程的话，根据我们的定义，它是一个索引过程，是存储过程的逆过程，所以我认为 x_storage 是作用在 VSL 到代码形式这一过程的。补全的数据变换图如下所示
 
-$$
-3.333333,2.733333,2.100000,1.566667
-$$
+![](/resources/2018-01-21-data-layout-in-mkl-vsl/workflow-cp.png)
 
-这一结果有些意外，但是我们仍能解释，它的计算过程其实就是对连续 N 个数取平均，并重复 DIM 次
+通过以上分析，我们再来看矩阵列均值的计算就会清晰很多，首先可以画出它的数据变换图
 
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/meanr.png)
+![](/resources/2018-01-21-data-layout-in-mkl-vsl/workflow-col.png)
 
-从上面的两次计算可以看到，如果在指定数据存储风格时不够严谨，得到的结果可能出乎我们的意料。
-
-但是我们也能从上面的计算中总结一些规律，我们看到，无论指定的存储风格是 类 C 的行存储，还是 Fortran 的列存储。VSL 内部都是在二维数组视图的行方向上计算均值，并且每次都是取 N 个数，共计算 DIM 次。
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris-f2-draw.png)
-
-![](/resources/2018-01-21-data-layout-in-mkl-vsl/iris-draw.png)
-
-掌握了这一规律之后，我们就能继续向我们的目标迈进一步，即通过维度 DIM，数量 N，以及存储风格的变换来适配矩阵的按行或者按列的统计量的计算。
-
-### 计算矩阵的统计量
-
-假设我们的矩阵是这样的
-
-$$
-\left[
-\begin{aligned}
-5.1\quad\quad& 4.9& 4.7\\
-3.5\quad\quad& 3.1& 3.2\\
-1.4\quad\quad& 1.4& 1.3\\
-0.2\quad\quad& 0.2& 0.2
-\end{aligned}
-\right]
-$$
-
-它的一维表示形式为
-
-$$
-[5.1\quad 4.9\quad 4.7\quad
-3.5\quad 3.1\quad 3.2\quad
-1.4\quad 1.4\quad 1.3\quad
-0.2\quad 0.2\quad 0.2]
-$$
-
-如果要计算每行的均值，根据前面的讨论，我们只需要设置 DIM = 4，N = 3，x_storage = VSL_SS_MATRIX_STORAGE_COLS。但如果要计算每列的均值，那么仅仅是设置 x_storage = VSL_SS_MATRIX_STORAGE_ROWS 是不够的，因为 N = 3，于是每次读取了 3 个数，总共计算 DIM = 4 次。而如果要按列计算，应该每次读 4 个数，总共计算 3 次，也就是说还应该交换 DIM 与 N 的值。修改后代码如下
+具体代码与前面类似，只不过交换了 ROW 与 COL 的值，并将 x_storage 修改成了 VSL_SS_MATRIX_STORAGE_COLS。
 
 ```c
-#include <stdio.h>
-#include "mkl.h"
+int main(){
 
-int main()
-{
+	/* 数组定义 \*/
 	  double matrix[] = {5.1, 3.5, 1.4, 0.2, 4.9, 3.1, 1.4, 0.2, 4.7, 3.2, 1.3, 0.2};
-	  MKL_INT DIM = 3;
-    MKL_INT N = 4;
+	  MKL_INT ROW = 4;
+    MKL_INT COL = 3;
+    MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_COLS;
 
     VSLSSTaskPtr task;
-    MKL_INT x_storage = VSL_SS_MATRIX_STORAGE_ROWS;
-    double mean[DIM];
+    double mean[ROW];
     int errcode;
     unsigned MKL_INT64 estimate = VSL_SS_MEAN;
 
-    errcode = vsldSSNewTask( &task, &DIM, &N, &x_storage, (double*)matrix, 0, 0 );
+    // 新建任务：导入数组描述
+    errcode = vsldSSNewTask( &task, &ROW, &COL, &x_storage, (double*)matrix, 0, 0 );
+    // 编辑任务：设定任务为均值计算
     errcode = vsldSSEditTask( task, VSL_SS_ED_MEAN, mean);
+    // 开始计算任务
     errcode = vsldSSCompute( task, estimate, VSL_SS_METHOD_FAST );
 
-	  printf("%f,%f,%f\n",mean[0], mean[1],mean[2]);
+	  printf("%f,%f,%f,%f\n",mean[0], mean[1],mean[2],mean[3]);
 
+    // 释放资源
     errcode = vslSSDeleteTask( &task );
     MKL_Free_Buffers();
     return errcode;
 }
-//output: 2.550000,2.400000,2.350000
+//output: 4.900000,3.266667,1.366667,0.200000
 ```
 
-但其实对于矩阵来说，DIM 和 N 这两个符号的意义并不明显，因为我们一般使用行数或者列数来描述矩阵的形状。所以直接改成行数 ROW 和列数 COL 应该更加合适一点。但还有一个问题是应该是将 DIM 改成 ROW，N 改成 COL？还是反过来？
-
-这一问题也好解决，在前面当 x_storage = VSL_SS_MATRIX_STORAGE_COLS 时，DIM = 4，N = 3，所以 DIM 就是行数，N 就是列数。
-
-接下来我们再考虑写一个通用的函数，来简化按行按列这两种情况的计算。它的参数应该被精心设计，首先应该能传递矩阵的数据，也就是一个数组指针，然后还应该让我们知道矩阵的行列数，以及一个标志用来表示我们需要按行或者按列计算，当然还有一个指针用来存储计算结果。它看起来应该是下面这样的
+更好的方法是将均值计算过程提取成函数，它的参数应该被精心设计，首先应该能传递矩阵的数据，也就是一个数组指针，然后还应该让我们知道矩阵的行列数，以及一个标志用来表示我们需要按行或者按列计算，当然还有一个指针用来存储计算结果。它看起来应该是下面这样的
 
 ```c
 int mean(double* matrix, int ROW, int COL, int axis, double* m);
+
 ```
 
-具体函数的代码如下
+实现代码如下
 
 ```c
 int mean(double* matrix, int ROW, int COL, int axis, double* m) {
 	  VSLSSTaskPtr task;
-    MKL_INT x_storage = (axis == 0)?VSL_SS_MATRIX_STORAGE_COLS:VSL_SS_MATRIX_STORAGE_ROWS;
+    MKL_INT x_storage = (axis == 0)?VSL_SS_MATRIX_STORAGE_ROWS:VSL_SS_MATRIX_STORAGE_COLS;
 	  if(axis != 0) {
 		   int temp = ROW;
 		   ROW = COL;
@@ -223,8 +251,7 @@ int mean(double* matrix, int ROW, int COL, int axis, double* m) {
     return errcode;
 }
 ```
-
-我们定义矩阵的时候按照实际情况设置它的 ROW 和 COL
+在应用的时候，我们按照实际情况设置矩阵的 ROW 和 COL
 
 ```c
 double matrix[] = {5.1, 3.5, 1.4, 0.2, 4.9, 3.1, 1.4, 0.2, 4.7, 3.2, 1.3, 0.2};
@@ -233,18 +260,18 @@ int COL = 3;
 double m[ROW];
 ```
 
- 然后调用函数，如果要计算每行的均值，令 axis = 0，否则计算每列的均值。
+然后调用函数，如果要计算每行的均值，令 axis = 0，否则计算每列的均值。
 
  ```c
 mean(matrix, ROW, COL, 0, m);
 printf("%f,%f,%f,%f\n",m[0], m[1],m[2],m[3]);
-// output: 4.900000,3.266667,1.366667,0.200000
+// output: 2.550000,2.400000,2.350000
 
 mean(matrix, ROW, COL, 1, m);
 printf("%f,%f,%f\n",m[0], m[1],m[2]);
-// output: 2.550000,2.400000,2.350000
+// output: 4.900000,3.266667,1.366667,0.200000
  ```
 
 ### 总结
 
-关于数组存储风格的讨论会稍微有点绕，因为这里面很多参数都在变动，比如二维数组的视图，索引类型，还有矩阵行列与样本数据的维度和数量的关系等等。经过本篇文章的讨论，我们看到只需要抓住最关键的部分，情况会清晰不少。也就是说，对于一个矩阵，我们可以按行连续的方式把它存到一维数组，在调用 VSL 代码时，如果要按行计算，只用设定存储方式为 VSL_SS_MATRIX_STORAGE_COLS，而若要按列计算，则除了要将存储方式设为 VSL_SS_MATRIX_STORAGE_ROWS 外，还需要交换 ROW 与 COL 的值。
+这篇文章的讨论稍微会有点绕，因为可变的因素实在太多，比如矩阵的存储风格，索引风格，行和列，转置之后的行和列，以及 VSL 对数组的处理方式等等，我们需要精心定义概念才不至于把自己搞懵。但是最终的结论很简单，如果要计算矩阵的行方向统计量（比如均值，方差等），则 ROW 和 COL 的值与矩阵的行与列匹配，存储方式设为行存储。如果要计算列方向上的统计量，则 ROW 和 COL 的值应该交换，并把存储方式设为列存储。
