@@ -1,6 +1,7 @@
 ---
 layout: post
 title: MKL 向量统计库 VSL 中的数据存储与索引风格的应用
+description: en-Introduce the data layout in Intel Math Kernel Library, it's controlled by the parameter VSL_SS_MATRIX_STORAGE_ROWS and VSL_SS_MATRIX_STORAGE_COLS. ch-介绍 Intel 数学核心库中的数据布局，由参数 VSL_SS_MATRIX_STORAGE_ROWS 和 VSL_SS_MATRIX_STORAGE_COLS 控制。
 ---
 
 由于 MKL 支持两种数据存储方式，在使用 VSL 进行统计计算的时候，可以使用参数 VSL_SS_MATRIX_STORAGE_ROWS 和 VSL_SS_MATRIX_STORAGE_COLS 来指定我们传入的数据布局为行存储或者列存储。但是我们一般习惯的是类 C 语言的行索引风格，所以这篇文章就来讨论一下如何使用 VSL 这两种风格的适当组合来适配计算矩阵的统计量。
