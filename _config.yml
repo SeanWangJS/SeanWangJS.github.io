@@ -64,6 +64,7 @@ gitalk:
   repository:  'SeanWangJS.github.io'
   owner:  'SeanWangJS'
   admin: ['SeanWangJS']
+  labels: ['Gitalk']
     # - owner
 
 ## Google Analytics ##
