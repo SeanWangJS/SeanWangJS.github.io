@@ -48,7 +48,7 @@ author:
   # twitter:  #your Twitter username
   github:  SeanWangJS
   # googleplus:  #your Google+ username
-  # weibo:  #your Weibo username
+  weibo:  Sudit
   # douban:  #your Douban username
   # linkedin:  #your Linkedin username
 
@@ -59,11 +59,11 @@ disqus:
 ## Comment system (gitalk) ##
 # please refer to https://github.com/gitalk/gitalk for more info.
 gitalk:
-  # clientID:  #Github Application Client ID
-  # clientSecret:  #Github Application Client Secret
-  # repository:  #Github repo
-  # owner:  #Github repo owner
-  # admin: #Github repo owner and collaborators, only these guys can initialize github issues, IT IS A LIST.
+  clientID:  'fab22ef3f9c9c7b0df5a'
+  clientSecret:  'bd1913b44738e270a3af53e74d092cc1f8c98dd1'
+  repository:  'SeanWangJS.github.io'
+  owner:  'SeanWangJS'
+  admin: ['SeanWangJS']
     # - owner
 
 ## Google Analytics ##
