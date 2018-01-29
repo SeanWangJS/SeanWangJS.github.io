@@ -1,18 +1,14 @@
 ---
-layout: default
+layout: blog-default
 ---
-{%- include header.html -%}
-
-<!-- Main -->
-<div id="main">
-	<!-- Page -->
-	<article class="shade-two">
-	  <div class="container">
-			<header>
-				<h2>{{- page.title -}}</h2>
-				{%- if page.subtitle -%}<p>{{- page.subtitle -}}</p>{%- endif -%}
-			</header>
-	    {{- content -}}
-	  </div>
-	</article>
+<div class="m-page">
+  <article class="main">
+    {%- include snippets/page-title.html -%}
+    <h1>{{ __return }}</h1>
+    <div class="m-article-content" itemprop="articleBody">{{ content }}</div>
+    {%- if page.comment != false -%}
+      <section>{%- include utils/comment-disqus.html -%}</section>
+      <section>{%- include utils/comment-gitalk.html -%}</section>
+    {%- endif -%}
+  </article>
 </div>
