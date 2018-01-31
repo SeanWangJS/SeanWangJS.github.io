@@ -259,6 +259,53 @@ public void test() {
 
 这时我们的 Functor 类便能够在任意类型之间实施链式映射，极大地扩展了接口的泛用性。我们可以用 Functor 包裹任意类型的值，然后连贯地对其进行转换，最终得到我们需要的结果（当然也是包裹在 Functor 内部的）。
 
+### 将函子抽象为接口
+
+如果我们直接将函子定义为一个类，将会有很大的局限性。因为，如果其他类也想实现函子的功能就必须继承 Functor，由于 Java 不允许多重继承，所以对没有明显父子关系的类使用继承是一种不好的结构。显然，其他类只是想获得函子的能力，从而能更好地用于其他用途，所以更好的方式是将 Functor 作为接口
+
+```java
+interface Functor<T>{
+
+  <R> Functor<R> map(Function<T, R> f);
+
+}
+```
+
+下面我们可以实现这个接口，方法和之前一样
+
+```java
+public class FunctorImpl<T> implements Functor<T> {
+
+  public T t;
+  public FunctorImpl(T t){
+    this.t = t;
+  }
+
+  public <R> Functor<R> map(Function<T, R> f) {
+    return new FunctorImpl<>(f.apply(t));
+  }
+
+  @Overide
+  public String toString() {
+    return t.toString();
+  }
+
+}
+```
+
+测试：
+
+```java
+
+@Test
+public void test() {
+  FunctorImpl<Integer> functor = new FunctorImpl(10);
+  System.out.println(functor.map(i -> i / 10.0));
+}
+//output: 1.0
+```
+
+
 待续。。
 
 

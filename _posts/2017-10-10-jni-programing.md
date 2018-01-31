@@ -1,9 +1,10 @@
 ---
 layout: post
 title: Java 本地调用(jni)编程基础
+tags: Java JNI
 ---
 
-首先说明一下，根据经验来看，得益于高性能的 java 虚拟机，使用纯 java 实现的代码不一定就比 c 语言的慢。但是在大量的 c 语言库中还藏有不少珍宝，或许是没必要重复造轮子，或许是没有信心写出比那些经过多年考验的代码更健壮的程序，jni 技术仍然具有很强的应用性。
+首先说明一下，根据经验来看，得益于高性能的 Java 虚拟机，使用纯 Java 实现的代码不一定就比 c 语言的慢。但是在大量的 c 语言库中还藏有不少珍宝，或许是没必要重复造轮子，或许是没有信心写出比那些经过多年考验的代码更健壮的程序，使用 Java 代码调用 C/C++ 仍然具有很高的价值。
 
 ### 一个 hello world 例子
 
@@ -88,7 +89,7 @@ gcc -c Hello.c -I "%JAVA_HOME%\include" -I "%JAVA_HOME%\include\win32"
 gcc -shared -o Hello.dll Hello.o
 ```
 
-使用下述代码即实现本地调用
+使用下述代码调用
 
 ```java
 //Main.java
