@@ -2,6 +2,7 @@
 layout: post
 title: 支持向量机基础知识 
 tags: 支持向量机
+modify_date: 2018-01-31
 ---
 
 考虑属于两个类别的样本集合

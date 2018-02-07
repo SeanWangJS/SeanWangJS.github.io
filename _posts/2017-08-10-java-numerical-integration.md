@@ -1,6 +1,7 @@
 ---
 layout: post
 title: 数值积分 Java 实现
+description: 基于 scheme 语言的启发，采用 Java 实现的数值积分代码
 ---
 
 之前在SICP上看到一个很厉害的东西，考虑三个问题：

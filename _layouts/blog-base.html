@@ -40,9 +40,26 @@
     s.parentNode.insertBefore(bp, s);
 })();
 </script>
+<!--JSON_LD for baidu-->
+<script type="application/ld+json">
+        {
+            "@context": "https://ziyuan.baidu.com/contexts/cambrian.jsonld",
+            "@id": "https://seanwangjs.github.io{{ page.url }}",
+            "appid": "1590917239121345",
+            "title": "{{ page.title }}",
+            "description": "{{ page.description }}",
+            "pubDate": "{{ page.date | date_to_xmlschema }}",
+            "upDate": "{{ page.modify_date | date_to_xmlschema }}"
+        }
+    </script>
+	
   </head>
   <body>
-    <div class="m-page-stage js-page-stage">{{ content }}</div>
+  
+	
+  
+
+  <div class="m-page-stage js-page-stage">{{ content }}</div>
     {%- include blog/footer.html -%}
     <script>
       $(function() {
