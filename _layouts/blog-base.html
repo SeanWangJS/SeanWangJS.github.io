@@ -48,8 +48,10 @@
             "appid": "1590917239121345",
             "title": "{{ page.title }}",
             "description": "{{ page.description }}",
-            "pubDate": "{{ page.date | date_to_xmlschema }}",
-            "upDate": "{{ page.modify_date | date_to_xmlschema }}"
+            "pubDate": "{{ page.date | date: "%Y-%m-%dT%H:%M:%S" }}"{%- if page.modify_data -%},
+			
+            "upDate": "{{ page.modify_date | date: "%Y-%m-%dT%H:%M:%S" }}"
+			{%- endif -%}
         }
     </script>
 	
