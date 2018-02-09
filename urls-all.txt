@@ -3,11 +3,13 @@ https://seanwangjs.github.io/2017/08/01/hashmap-source-code-01.html
 https://seanwangjs.github.io/2017/08/03/behavior-tree-command-parser.html
 https://seanwangjs.github.io/2017/08/10/java-numerical-integration.html
 https://seanwangjs.github.io/2017/08/14/equations-solving-steepest-descent.html
+
 https://seanwangjs.github.io/2017/08/15/equations-solving-conjugate-gradient.html
 https://seanwangjs.github.io/2017/08/24/smo-algorithm.html
 https://seanwangjs.github.io/2017/09/05/delaunay-mesh-generation.html
 https://seanwangjs.github.io/2017/09/18/note-java-logger.html
 https://seanwangjs.github.io/2017/09/23/translate-project-jigsaw.html
+
 https://seanwangjs.github.io/2017/09/29/c-compile-and-mkl-link.html
 https://seanwangjs.github.io/2017/10/02/autodyn-parallel-computing.html
 https://seanwangjs.github.io/2017/10/10/jni-programing.html
