@@ -207,7 +207,7 @@ $$
 \max_{\alpha_i \ge 0,\beta_i\ge 0}\min_{\omega, b, \xi}  L(\omega, b,\xi, \alpha,\beta)
 $$
 
-先求解 $$L(\omega, b,\xi, \alpha,\beta)$$ 关于 $$\omega, b, \\xi$$ 的极值
+先求解 $$L(\omega, b,\xi, \alpha,\beta)$$ 关于 $$\omega, b, \xi$$ 的极值
 
 $$
 \nabla_\omega L = \omega - \sum_{i=1}^n \alpha_i y_i x^{(i)} = 0
