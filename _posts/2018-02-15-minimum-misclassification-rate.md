@@ -75,7 +75,15 @@ $$
 p(x,\mathcal{C}_i) = p(\mathcal{C}_i \mid x)p(x)
 $$
 
-由于 $$p(x)$$ 对于所有 $$x$$ 来说是一样的，所以最大的 $$p(x,\mathcal{C}_i)$$ 等价于最大的 $$p(\mathcal{C}_i\mid x)$$ 。定义错误率
+其中 $$p(\mathcal{C}_i \mid x)$$ 为知晓特征 $$x$$ 后，进行分类的后验概率，由于 $$p(x)$$ 对于所有 $$x$$ 来说是一样的，所以最大的 $$p(x,\mathcal{C}_i)$$ 等价于最大的后验概率 $$p(\mathcal{C}_i\mid x)$$ 。另一方面，又有
+
+$$
+p(x,\mathcal{C}_i) = p(x\mid \mathcal{C_i})p(\mathcal{C}_i)
+$$
+
+这里的 $$p(x\mid \mathcal{C}_i)$$ 是已知类别条件下的特征概率密度函数，$$p(\mathcal{C}_i)$$ 是类别的先验概率，通过这两个值同样能计算出联合分布。
+
+再定义错误率
 
 $$
 p(error) = 1 - p(correct)
