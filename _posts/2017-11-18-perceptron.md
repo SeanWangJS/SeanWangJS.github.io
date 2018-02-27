@@ -14,13 +14,13 @@ $$
 \omega^T x + b = 0
 $$
 
-其中 $$\omega, x$$ 都是 *d* 维向量，并且规定 $$\|\omega\| = 1$$（由于同时缩放 $$\omega, b$$ 不会对超平面的位置产生任何影响，所以无论如何我们都可以作如此假设）。然后对任意的 $$x \in S$$ ，定义函数
+其中 $$\omega, x$$ 都是 *d* 维向量。然后对任意的 $$x \in S$$ ，定义函数
 
 $$
-r(x) = \omega^T x+ b
+r(x) = \frac{\omega^T}{\|\omega\|} x+ \frac b{\|\omega\|}
 $$
 
-容易证明 $$r(x)$$ 的模实际上就是点 $$x$$ 到超平面的距离，至于 $$x$$ 在超平面的哪一侧，则由 $$r(x)$$ 的符号决定。并且规定，如果 $$x$$ 能被正确分类，那么当 $$y=1$$ 时，$$r(x) > 0$$ ，否则 $$r(x) < 0$$ （很明显，这可以通过改变 $$\omega ,b$$ 的符号做到，而且同样不会对超平面的位置产生影响）。于是我们看到，如果点 $$x^{(i)}$$ 被超平面错误分类，例如 $$x^{(i)}$$ 的类别标签 $$y_i = 1$$ ,但是 $$r(x^{(i)})$$ 却小于 0，则有
+容易证明 $$r(x)$$ 的模实际上就是点 $$x$$ 到超平面的距离，至于 $$x$$ 在超平面的哪一侧，则由 $$r(x)$$ 的符号决定。并且规定，使 $$r(x) > 0$$ 的类别，标签值 $$y=1$$，否则 $$y=-1$$ 。于是我们看到，如果点 $$x^{(i)}$$ 被超平面错误分类，例如 $$x^{(i)}$$ 的类别标签 $$y_i = 1$$ ,但是 $$r(x^{(i)})$$ 却小于 0，则有
 
 $$
 y_i r(x^{(i)}) < 0
@@ -32,10 +32,48 @@ $$
 J(\omega, b) = -\sum_{x^{(i)} \in \mathcal{E}} y_i r(x^{(i)})
 $$
 
-其中 $$\mathcal{E}$$ 表示被超平面错分的数据集合。显然，被错误分类的数据越少， $$J(\omega,b)$$ 的值也越小，并且极值为 0。所以我们的优化目标就是
+其中 $$\mathcal{E}$$ 表示被超平面错分的数据集合。这表达的是所有错分数据到超平面的距离和，显然，被错误分类的数据越少， $$J(\omega,b)$$ 的值也越小，并且极值为 0。所以我们的优化目标就是
 
 $$
 \min_{\omega ,b} \quad J(\omega, b)
+$$
+
+下面我们采用梯度下降法来求解该优化问题，首先计算 $$J(\omega, b)$$ 关于 $$\omega$$ 的梯度，推导过程如下，首先，两端同时乘以 $$\|\omega\|$$
+
+$$
+J(\omega, b) = -\sum_{x^{(i)}\in \mathcal{E}} y_i \left(\frac {\omega^T}{\|\omega\|}x^{(i)} + \frac b {\|\omega\|}\right)\\
+\Rightarrow
+\|\omega\|J(\omega, b) = -\sum_{x^{(i)}\in \mathcal{E}} y_i (\omega^T x^{(i)}  + b)
+$$
+
+其中 $$\|\omega\|=\sqrt{\omega^T \omega}$$ ，然后两端关于 $$\omega$$ 求梯度
+
+$$
+\begin{aligned}
+&\nabla_{\omega}(\sqrt{\omega^T \omega}) J + \sqrt{\omega^T \omega}\nabla_{\omega} J = -\sum_{x^{(i)}\in \mathcal{E}}y_i x^{(i)}\\
+\Rightarrow&  J\frac{\omega}{\|\omega\|}+ \|\omega\| \nabla_{\omega} J = -\sum_{x^{(i)}\in \mathcal{E}}y_i x^{(i)}\\
+\Rightarrow&\nabla_{\omega} J = \frac 1 {\|\omega\|^2}\left(-\|\omega\|\sum_{x^{(i)}\in \mathcal{E}}y_i x^{(i)}
+-J \omega
+\right)\\
+&= \frac 1 {\|\omega\|^2}\left(-\|\omega\|\sum_{x^{(i)}\in \mathcal{E}}y_i x^{(i)}
++
+\sum_{x^{(i)}\in \mathcal{E}} y_i \left(\frac {\omega^T\omega} {\|\omega\|}x^{(i)} + \frac {b \omega} {\|\omega\|}\right)
+\right)\\
+&=\frac {b\omega} {\|\omega\|^3}\sum_{x^{(i)}\in \mathcal{E}}y_i
+\end{aligned}
+$$
+
+而 $$J(\omega, b)$$ 对 $$b$$ 的导数为
+
+$$
+\frac{\partial J}{\partial b} = -\frac 1 {\|\omega\|} \sum_{x^{(i)}\in \mathcal{E}} y_i
+$$
+
+所以 $$\omega,b$$ 的更新过程分别为
+
+$$
+\omega^{(k+1)} = \omega^{(k)} -\alpha \frac {b^{(k)}\omega^{(k)}} {\|\omega^{(k)}\|^3}\sum_{x^{(i)}\in \mathcal{E}}y_i\\
+b^{(k+1)} = b^{(k)} +\alpha\frac 1 {\|\omega^{(k)}\|} \sum_{x^{(i)}\in \mathcal{E}} y_i
 $$
 
 如果定义向量 $$\mathbf{w} = [b\quad \omega]$$ ，并且再对每个数据增加一个维度，将其设值为 1，即 $$\mathbf{x} = [1\quad x]$$，那么超平面方程就可以写成更紧凑的形式
