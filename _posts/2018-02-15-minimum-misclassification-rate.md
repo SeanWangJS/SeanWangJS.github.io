@@ -63,13 +63,13 @@ p(correct) &= p\left(\bigcup_{i=1}^n (x\in R_i, \mathcal{C}_i)\right) \\
 \end{aligned}
 $$
 
-可以看到，这个概率的值于特征空间划分方式有关，那么怎样的划分才能使上述函数取到最大值呢？为了简单起见，考虑一维特征空间下的联合分布函数 $$p(x, \mathcal{C}_i)$$ 图像
+可以看到，这个概率的值与特征空间划分方式有关，那么怎样的划分才能使上述函数取到最大值呢？为了简单起见，考虑一维特征空间下的联合分布函数 $$p(x, \mathcal{C}_i)$$ 图像
 
 ![](/resources/2018-02-15-minimum-misclassification-rate/union-distributions.png)
 
 以图中的点 $$x_k$$ 举例，如果 $$x_k \in R_0$$ ，那么在计算积分的时候，其对应的被积函数值为 $$p(x_k, \mathcal{C}_0)$$，而如果 $$x_k \in R_1$$ ，那么相应的被积函数值为 $$p(x_k, \mathcal{C}_1)$$，由于 $$p(x_k, \mathcal{C}_1) > p(x_k, \mathcal{C}_0)$$ ，所以为了使 $$p(correct)$$ 尽量大，最好的划分方式就是令 $$x_k \in R_1$$。
 
-通过上面的分析可知，要使正确率尽量大，可以先计算联合分布 $$p(x,\mathcal{C}_i),\,\,i=1,2,,,n$$ ，找到其中的最大值，然后将 $$x$$ 归入相应的类别。然后考虑到
+通过上面的分析可知，要使正确率尽量大，可以先计算联合分布 $$p(x,\mathcal{C}_i),\,\,i=1,2,,,n$$ ，找到其中的最大值，然后将 $$x$$ 归入相应的类别。考虑到
 
 $$
 p(x,\mathcal{C}_i) = p(\mathcal{C}_i \mid x)p(x)

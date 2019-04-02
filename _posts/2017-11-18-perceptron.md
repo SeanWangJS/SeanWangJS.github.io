@@ -3,7 +3,7 @@ layout: post
 title: 感知器算法
 tags: 神经网络
 description: 从线性分类的角度介绍感知器的分类原理，使用梯度下降法进行了一个简单的二维分类
-modify_date: 2018-02-24
+modify_date: 2018-03-24
 ---
 
 ### 线性分类观点

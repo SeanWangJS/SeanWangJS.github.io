@@ -312,7 +312,7 @@ JavaFileManager jfm = new ForwardingJavaFileManager(fileManager) {
                                                        JavaFileObject.Kind kind,
                                                        FileObject sibling) throws IOException {
                 if(kind == JavaFileObject.Kind.CLASS) {
-                    return new SimpleJavaFileObject(URI.create(""), JavaFileObject.Kind.CLASS) {
+                    return new SimpleJavaFileObject(URI.create(className + ".class"), JavaFileObject.Kind.CLASS) {
                         public OutputStream openOutputStream() {
                             return new FilterOutputStream(new ByteArrayOutputStream()) {
                                 public void close() throws IOException{
@@ -403,7 +403,7 @@ CharBuffer.wrap(source_code);
 于是我们自定义的 JavaFileObject 如下
 
 ```java
-SimpleJavaFileObject sourceJavaFileObject = new SimpleJavaFileObject(URI.create(""),
+SimpleJavaFileObject sourceJavaFileObject = new SimpleJavaFileObject(URI.create(className + ".java"),
                 JavaFileObject.Kind.SOURCE){
   public CharBuffer getCharContent(boolean b) {
     return CharBuffer.wrap(source_code);
