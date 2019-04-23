@@ -135,6 +135,28 @@ G_k \cdot c_k - \bar{\alpha}_k&= G_k (G_k^T G_k)^{-1} G_k^T \bar {\alpha}_k - \b
 L(\alpha, a, b) = \sum_{k=1}^n (G_k \cdot c_k - \bar{\alpha}_k)^2 = \sum_{k=1}^n \bar{\alpha}_k^T \bar{G}_k^T \bar{G_k}\bar{\alpha}_k    
     \]
 
+
+\[
+    \begin{aligned}
+    \bar{G}_k^T \bar{G}_k &= (G_k (G_k^T G_k)^{-1} G_k^T  - I)^T (G_k (G_k^T G_k)^{-1} G_k^T  - I)\\
+    &=(G_k (G_k^T G_k)^{-1} G_k^T  - I) (G_k (G_k^T G_k)^{-1} G_k^T  - I)\\
+    &=G_k (G_k^T G_k)^{-1} G_k^T G_k (G_k^T G_k)^{-1} G_k^T - 2G_k (G_k^T G_k)^{-1} G_k^T + I\\
+    &=I - G_k (G_k^T G_k)^{-1} G_k^T
+    \end{aligned}
+    \]
+
+\[
+    \bar{G}_k^T \bar{G}_k = -\bar{G}_k 
+    \]
+
+\[
+    (\bar{G}_k^T+I)\bar{G}_k = 0
+    \]
+
+\[
+    a^T M^T M a = a^T (M^T M) \cdot a
+    \]
+
 ---
 
 \[
@@ -239,7 +261,77 @@ H^{-1}
 b = \sum_{i = 1}^ 3 a^i B_2^i
     \]
 
+$$
+J(\alpha, a, b) = \sum_{j\in W} \left(
+    \sum_{i \in w_j} \left(
+        \alpha_i - \sum_{t=1}^3 a_j^t I_i^t - b_j
+        \right)^2 + \epsilon \sum_{t=1}^3(a_j^t)^2
+    \right)
+$$
 
+$$
+\left[
+    \begin{aligned}
+    \sum_{t=1}^3 a_j^t I_1^t + b_j \\
+    \sum_{t=1}^3 a_j^t I_2^t + b_j \\
+    \sum_{t=1}^3 a_j^t I_3^t + b_j \\
+    ...\\
+    \sum_{t=1}^3 a_j^t I_9^t + b_j \\
+    \sqrt{\epsilon} a_j^1 \\
+    \sqrt{\epsilon} a_j^2 \\
+    \sqrt{\epsilon} a_j^3
+    \end{aligned}
+    \right]
+    -
+    \left[
+        \begin{aligned}
+        \alpha_1\\
+        \alpha_2\\
+        \alpha_3\\
+        ... \\
+        \alpha_9\\
+        0 \\
+        0 \\
+        0
+        \end{aligned}
+        \right]
+$$
+
+$$
+\left[
+    \begin{aligned}
+    I_1^1 \quad I_1^2 \quad I_1^3 \quad 1 \\
+    I_2^1 \quad I_2^2 \quad I_2^3 \quad 1 \\
+    I_3^1 \quad I_3^2 \quad I_3^3 \quad 1 \\
+    ...\\
+    I_9^1 \quad I_9^2 \quad I_9^3 \quad 1 \\
+    \sqrt{\epsilon} \quad 0 \quad 0 \quad 0 \\
+    0 \quad \sqrt{\epsilon} \quad 0 \quad 0 \\
+    0 \quad 0 \quad \sqrt{\epsilon} \quad 0
+    \end{aligned}
+    \right]
+    \left[
+        \begin{aligned}
+        a_j^1 \\
+        a_j^2 \\
+        a_j^3 \\
+        b_j
+        \end{aligned}
+        \right]
+         -
+    \left[
+        \begin{aligned}
+        \alpha_1\\
+        \alpha_2\\
+        \alpha_3\\
+        ... \\
+        \alpha_9\\
+        0 \\
+        0 \\
+        0
+        \end{aligned}
+        \right]
+$$
 
 ---
 
