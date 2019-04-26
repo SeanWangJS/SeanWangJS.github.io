@@ -1,45 +1,33 @@
 ---
-layout: post
 title: 反向传播算法
-tags: 神经网络
-modify_date: 2019-04-26
 ---
 
-本文的符号约定来自于 Andrew Ng 的 cs294a，推导过程参考边肇祺的《模式识别 第二版》。
-
-![](/resources/2018-02-28-back-propagation-algorithm/forward_net.png)
-
-上图是一个典型的前馈网络结构，定义训练集 
+训练集 
 
 $$
 S = \{(x^{(i)}, y^{(i)}) \mid i = 1,,,m\}
 $$
 
-定义权重矩阵集，和偏置项集
+前馈计算
 
 $$
-W = \{W^i \mid i = 1,,,n_l\}, b = \{b^i\mid i = 1,,,n_l\}
+\begin{aligned}
+z^{(l+1)} &= W^{(l)} a^{(l)} + b^{(l)}\\
+a^{(l+1)} &= f(z^{(l+1)})
+\end{aligned}
 $$
 
-图中隐藏层和输出层的单元被分隔成两部分，其中左边部分的 \\(z^l\\) 代表前一层单元的加权值
+其中输入层 \\(a^{(1)} = x\\)，输出层 \\(a^{(n_l)} = \hat{y}\\)
+
+神经网络
 
 $$
-z^{l+1} = W^l a^l + b^l
+h_{W, b}(x)
 $$
 
-右边的 \\(a^l\\) 则代表本单元的激活值
+其中 \\(W,b\\) 分别表示网络的权重矩阵集以及偏置项集
 
-$$
-a^{l+1} = f(z^{l+1})
-$$
-
-其中 \\(f\\) 为激活函数。在输入层有 \\(a^1 = x^{(i)}\\)，这里的 \\(i\\) 代表样本编号。通过层层传递，在最后一层输出 \\(a^{n_l}\\)，假设整个神经网络为黑箱函数 \\(h_{W,b}(x)\\)，那么
-
-$$
-a^{n_l} = h_{W,b}(x)
-$$
-
-定义单个样本损失函数
+单个样本损失函数
 
 $$
 J(W, b; x, y) = \frac 1 2 \parallel h_{W, b}(x) - y \parallel^2
@@ -48,29 +36,30 @@ $$
 总体损失函数
 
 $$
-J(W, b) = \frac 1 m \sum_{i=1}^m J(W, b;x^{(i)}, y^{(i)}) + \frac {\lambda} 2 \sum_{l=1}\sum_{i=1}\sum_{j=1} \left(W_{ij}^{l}\right)^2
+J(W, b) = \frac 1 m \sum_{i=1}^m J(W, b;x^{(i)}, y^{(i)}) + \frac {\lambda} 2 \sum_{l=1}\sum_{i=1}\sum_{j=1} \left(W_{ij}^{(l)}\right)^2
 $$
 
-其中 \\(\frac {\lambda} 2 \sum_{l=1}\sum_{i=1}\sum_{j=1} \left(W_{ij}^{l}\right)^2\\) 是正则项，\\(\lambda\\) 为正则化系数。
-
-为了求解优化问题
-
-$$
-\min_{W, b} J(W, b)
-$$
-
-可以利用梯度下降优化算法，迭代公式为
+梯度下降优化，迭代公式
 
 $$
 \begin{aligned}
-W_{ij}^l &= W_{ij}^l - \alpha \frac{\partial }{\partial W_{ij}^l} J(W, b)\\
- b_i^l &= b_{i}^l - \alpha \frac{\partial }{\partial b_i^l} J(W, b) 
+W_{ij}^{(l)} &= W_{ij}^{(l)} - \alpha \frac{\partial }{\partial W_{ij}^{(l)}} J(W, b)\\
+ b_i^{(l)} &= b_{i}^{(l)} - \alpha \frac{\partial }{\partial b_i^{(l)}} J(W, b) 
 \end{aligned}
 $$
 
-这里的 \\(l\\) 代表任意层，为了计算损失函数对任意层权重矩阵的梯度，下面我们按步骤讨论著名的反向传播算法：
+<!-- 其中 -->
 
-1、 前馈计算每一层的激活值 \\(a^l\\)，直到最后一层 \\(a^{n_l}\\)。
+<!-- $$
+\begin{aligned}
+\frac{\partial }{\partial W_{ij}^{(l)}} J(W, b) &= \frac 1 m \sum_{k=1}^m \frac{\partial }{\partial W_{ij}^l} J(W, b; x^{(k)}, y^{(k)}) + \lambda W_{ij}^{(l)}\\
+\frac{\partial }{\partial b_i^{(l)}} J(W, b)&=\frac {1} {m} \sum_{k=1}^m 
+\frac{\partial}{\partial b_i^{(l)}}J(W, b; x^{(k)}, y^{(k)})
+\end{aligned}
+$$ -->
+
+反向传播：
+1、 前馈计算每一层的激活值 \\(a^{(l)}\\)，直到最后一层 \\(a^{(n_l)}\\)。
 2、 设最后一层与倒数第二层的权重矩阵为 \\(W^{n_l-1}\\)，计算总体损失函数对各权重参数的偏导数
 
 $$
@@ -141,4 +130,32 @@ $$
 \delta_j^l = \sum_{k=1}\delta_{k}^{l+1} W_{jk}^l f'(a_j^l)
 $$
 
-通过上述步骤，我们看到，通过计算后一层的 \\(\delta^{l+1}\\) ，可以得到前一层的 \\(\delta^l\\) 以及 \\(\frac J{W_{ij}^l}\\)，并且层层向前传播，刚好与前馈计算的方向相反，这也是反向传播算法名称的由来。
+<!-- 2、 对于输出层的每个神经元，计算
+
+$$
+\begin{aligned}
+\delta_i^{(n_l)} &= {\frac{\partial}{\partial z_{i}^{(n_l)}}} J(W, b; x^{(i)}, y^{(i)})\\
+&= \frac{\partial J}{\partial f(z_i^{(n_l)})} \frac{\partial f(z_i^{(n_l)})}{\partial z_{i}^{(n_l)}}\\
+&=\frac{\partial J}{\partial a_i^{n_l}} f'(z_i^{n_l})\\
+&=\frac{\partial}{\partial a_i^{n_l}} 
+\frac 1 2 \parallel a_i^{n_l} - y^{(i)} \parallel^2
+f'(z_i^{n_l})\\
+&=(a_i^{n_l} - y^{(i)})f'(z_i^{n_l})
+\end{aligned}
+$$
+ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

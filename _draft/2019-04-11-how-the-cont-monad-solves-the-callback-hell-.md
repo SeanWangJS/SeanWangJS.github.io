@@ -185,7 +185,79 @@ Monad.pure(1)
 
 当调用 Monad 的 bind 函数时，这里的参数 a 便被赋值为该 Monad 所包裹的值，换句话说就是 Monad 所包裹的值被绑定到 bind 的 lambda 表达式的参数上，这也是之所以这个函数叫 bind 的原因。
 
-但是上面这个简单的 Monad 并不足以解决我们的问题，我们真正需要的是 Cont Monad，这里的 Cont 代表 continuation。continuation 其实是一个术语，可以简单理解成回调，或者更准确的说是执行回调函数的动作，这里的差别很微妙，比如回调函数我们可以写成
+但是上面这个简单的 Monad 并不足以解决我们的问题，我们真正需要的是 Cont Monad。为了搞清楚 Cont Monad 究竟是什么，我们先来了解 CPS 函数，全称 continuation-passing style，字面意思是连续传输风格的函数，这里的传输表示参数的传送，什么意思呢？举个简单的例子，一个进行加法运算的普通函数定义如下
+
+```java
+public double plus10(double a) {
+    return 10 + a;
+}
+```
+
+如果我们要对返回值进行其他操作，比如打印出来，则需要把返回值传给打印函数
+
+```java
+double result = plus10(10);
+System.out.println(result);
+```
+
+而对于 CPS 函数来说，它不返回结果，而是把结果继续传给另一个函数，比如下面CPS版本的 plus10
+
+```java
+public void plus10CPS(double a, Function<Double, Void> f) {
+    double result = 10 + a;
+    f.apply(result);
+}
+```
+
+该函数除了接收本来的参数 a 以外，还接收一个函数 f 用于后续计算，并在函数体中，将结果传给 f，而这类似于 f 的函数有一个统一的称呼，就叫 continuation，
+
+
+
+
+这里的 Cont 代表 continuation。continuation 其实是一个术语，可以理解成“程序剩下的部分”（By 知乎@圆桌骑士魔理沙），但还是不太明了，我们来细致分析一下，既然提到了“程序剩下的部分”，那么肯定还隐含两个概念，那就是“完整的程序”和“程序已有的部分”。举一个简单的例子，如果要拼接字符串 "hello" + " Cont"
+
+```java
+"hello" + " Cont";
+```
+
+对于 "hello" 来说，它自身是已有的部分，则剩下的部分就为
+
+```java
+Function<String, String> f = str -> str + " Cont";
+```
+
+于是完整的程序就可以重写为
+
+```java
+//已有的部分
+String str = "hello";
+
+//剩余的部分
+Function<String, String> f = str -> str + " Cont";
+f.apply(str);
+```
+
+上面例子中程序的目的是很明确的，但如果我们还不知道完整的程序是什么，那么该如何表示程序剩下的部分呢？比如已知字符串 "hello "，只知道程序会用到它，但并不知道会怎么用它，我们仍借助占位符
+
+```java
+Function<Function<String, B>, B> left = f -> f.apply("hello");
+```
+
+其中 f 是接收 String 类型的函数，其返回类型未知，我们用泛型来表示。left 就是我们已知 "hello" 后程序剩下的部分，也就是 continuation。当我们在之后的某个时间决定了该怎样使用已知的 "hello" 后，便可将此动作作为参数传给 left，比如打印操作
+
+```java
+left.apply(s -> {
+    System.out.println(s);
+    return null;
+});
+```
+
+这里之所以要返回 null，是因为 left 接收的参数是一个 Function，必须有一个返回值，此时 B 的具体类型可以写成 Void。
+
+从上面的描述中我们能发现 continuation 接收的参数其实其实是一个回调函数，之后我们将看到，正是因为这层关系，才使得 Cont Monad 能解决回调地狱的难题。接下来我们讨论 Cont 的定义，首先，Cont 是一个 Monad，拥有 pure 和 bind 方法，其次 Cont 封装了一个 continuation，方法为 cont，最后，为了将具体操作传给 continuation，Cont 还拥有 runCont 方法，具体的实现代码如下
+
+<!-- 
+可以简单理解成回调，或者更准确的说是执行回调函数的动作，这里的差别很微妙，比如回调函数我们可以写成
 
 ```java
 Function<A, B> callback = a -> func(b);
@@ -197,7 +269,7 @@ Function<A, B> callback = a -> func(b);
 Function<<Function<A, B>, B> action = callback -> callback.apply(a);
 ```
 
-回调函数的输入类型是 A，输出类型是 B，而执行回调函数的动作的输入是一个回调函数，输出是该回调函数的输出类型。Cont 就像前面的 Monad 一样，里面包裹了某种东西，不同的是，Cont 包裹的是执行回调函数的动作，另外还有两个函数 cont 和 runCont，cont 函数负责接收一个执行回调函数的动作，并将其封装后返回 Cont 对象，而 runCont 则接收一个具体的回调函数，并执行该 Cont 所封装的动作。具体代码如下
+回调函数的输入类型是 A，输出类型是 B，而执行回调函数的动作的输入是一个回调函数，输出是该回调函数的输出类型。Cont 就像前面的 Monad 一样，里面包裹了某种东西，不同的是，Cont 包裹的是执行回调函数的动作，另外还有两个函数 cont 和 runCont，cont 函数负责接收一个执行回调函数的动作，并将其封装后返回 Cont 对象，而 runCont 则接收一个具体的回调函数，并执行该 Cont 所封装的动作。具体代码如下 -->
 
 ```java
 public class Cont<R, A> {
@@ -269,23 +341,26 @@ k = s -> Cont.cont(cb -> cb.apply(s + " Cont"))
 Function<Function<B, R>, R> f = callback -> runCont(a -> k.apply(a).runCont(callback));
 ```
 
-在我们的例子中，callback 的类型为 Function<String, Void>，a 的类型为 String，k 在应用 a 之后表达式变换为
+k 在应用 a 之后表达式变换为
 
 ```java
-Function<Function<String, Void>, Void> f = callback -> runCont(a -> 
-    Cont.cont(cb -> cb.apply(a + " Cont")).runCont(callback)
-);
+f = callback -> 
+        runCont(a -> 
+            Cont.cont(cb -> cb.apply(a + " Cont"))
+                .runCont(callback)
+        );
 ```
 
 继续规约内部那个 runCont
 ```java
-Function<Function<String, Void>, R> f = callback -> runCont(a -> 
-    (cb -> cb.apply(a + " Cont")).apply(callback)
+f = callback -> 
+        runCont(a -> 
+            (cb -> cb.apply(a + " Cont")).apply(callback)
+        )
 
-    = callback -> runCont(
+  = callback -> runCont(
         a -> callback.apply(a + " Cont")
     )
-);
 ```
 
 再继续执行 runCont 的话，其调用者就应该是前面提到的 
@@ -297,16 +372,51 @@ applyCallback = callback -> callback.apply("hello")
 为了避免混淆，我们将 bind 里面的 callback 修改成 callback2，于是有
 
 ```java
-Function<Function<String, Void>, Void> f = callback2 -> 
-    (callback -> callback.apply("hello"))
-        .apply(a -> callback2.apply(a + " Cont"))
+  f = callback2 -> 
+        applyCallback
+            .apply(a -> callback2.apply(a + " Cont"))
+
+    = callback2 -> 
+        (callback -> callback.apply("hello"))
+            .apply(a -> callback2.apply(a + " Cont"))
         
     = callback2 -> (a -> callback2.apply(a + " Cont")).apply("hello")
 
     = callback2 -> callback2.apply("hello" + " Cont")
 ```
 
-通过上述一系列规约，我们看到了 bind 函数执行了字符串拼接，并将其作为参数再次构造了一个“执行回调函数的动作”，使用 cont 封装成 Cont 返回。
+通过上述一系列规约，我们看到了 bind 函数执行了字符串拼接，并将其作为参数再次构造了一个“执行回调函数的动作”，使用 cont 封装成 Cont 返回。最后执行 
+
+```java
+ .runCont(message ->{
+     System.out.println(message);
+     return null;
+ });
+```
+
+就可以表述为
+
+```java
+Cont.cont(callback2 -> callback2.apply("hello" + " Cont"))
+    .runCont(message ->{
+        System.out.println(message);
+        return null;
+    })
+
+    = callback2 -> callback2.apply("hello Cont")
+        .apply(message ->{
+            System.out.println(message);
+            return null;
+        })
+    
+    = (message -> {
+            System.out.println(message);
+            return null;
+        }).apply("hello Cont")
+
+// output:
+// hello Cont
+```
 
 下面我们再分析一个例子巩固一下
 
@@ -331,27 +441,39 @@ applyCallback = callback -> callback.apply(new DWrapper(1.0))
 k = w -> Cont.cont(cb -> w.plus(2, cb));
 
 Function<Function<DWrapper, Void>, Void> f = callback -> 
-        runCont(a -> k.apply(a).runCont(callback)
-    )
-
+        runCont(a -> k.apply(a).runCont(callback))
+    // 替换 k = w -> Cont.cont(cb -> w.plus(2, cb))
     = callback -> runCont(a -> 
         (w -> Cont.cont(cb -> w.plus(2, cb)))
         .apply(a)
         .runCont(callback)
     )
-
+    // 利用 a 规约 w
     = callback -> runCont(a -> 
         Cont.cont(cb -> a.plus(2, cb))
         .runCont(callback)
     )
-
+    // 利用 Cont.cont(lambda).runCont(callback) = lambda.apply(callback)
     = callback -> runCont(a -> 
         (cb -> a.plus(2, cb)).apply(callback)
     )
-
-    = callback -> runCont(
-        callback -> a.plus(2, callback)
+    // 利用 callback 规约 cb，为了区分，使用 callback2 替换 callback
+    = callback2 -> runCont(a -> 
+        a.plus(2, callback2)
     )
-
+    // 此 applyCallback 是本 Cont 封装的“执行回调函数的动作”
+    = callback2 -> applyCallback.apply(a -> a.plus(2, callback2))
+    
+    = callback2 -> 
+        (callback -> callback.apply(new DWrapper(1.0)))
+                .apply(a -> a.plus(2, callback2))
+        
+    = callback2 -> 
+        (a -> a.plus(2, callback2))
+            .apply(new DWrapper(1.0))
+    
+    = callback2 -> new DWrapper(1.0).plus(2, callback2)
 
 ```
+
+可以看到，bind 函数中的一系列转换最终生成了一个以回调函数为参数的 lambda 表达式，并执行了加法运算
