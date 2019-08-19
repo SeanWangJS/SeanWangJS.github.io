@@ -36,7 +36,7 @@ $$
 
 而 x 方向上是线性拉伸，假设拉伸 2 倍，那么就是说把 src 上列号为 \\(j\\) 的点映射到 dst 列号为 \\(2j\\) 的位置，我们可以用一条简单的直线来表达这种映射关系
 
-![](../resources/2019-07-15-opencv-image-process-nonlinear-stretch/mapping_linear.png)
+![](/resources/2019-07-15-opencv-image-process-nonlinear-stretch/mapping_linear.png)
 ![](mapping_linear.png)
 
 于是 mat1 的形式就如下
@@ -52,13 +52,11 @@ $$
 
 使用上面两个矩阵，我们可以得到下图
 
-![](../resources/2019-07-15-opencv-image-process-nonlinear-stretch/stretch_linear.jpg)
-![](stretch_linear.jpg)
+![](/resources/2019-07-15-opencv-image-process-nonlinear-stretch/stretch_linear.jpg)
 
 显然符和条件。接下来我们考虑非线性拉伸，注意我们的要求是图片最右端的拉伸程度为 0 ，最左端拉伸程度达到最大，这时映射关系应该是一条曲线，并且最右端的切线斜率应该等于 1。假设总体拉伸仍是 2 倍，那么映射曲线如下
 
-![](../resources/2019-07-15-opencv-image-process-nonlinear-stretch/mapping_unlinear.png)
-![](mapping_unlinear.png)
+![](/resources/2019-07-15-opencv-image-process-nonlinear-stretch/mapping_unlinear.png)
 
 当然，满足这一条件的曲线很多，我们这里就以二次曲线来做说明，因为已知两个点的坐标，以及一个点上的切线斜率可以计算出二次曲线的函数。比如本例中该曲线的函数形式为
 
