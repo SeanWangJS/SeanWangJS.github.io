@@ -49,4 +49,3 @@ vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 service network restart
 ```
 
-即可联网成功。
