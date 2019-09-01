@@ -76,4 +76,59 @@ foo1(p1, res1 => {
 })
 ```
 
-为了解决这一问题，我们将在后面介绍 Future 的用法，本篇的目的主要是是熟悉 vertx 中的异步回调编程风格。
+为了解决这一问题，我们将在后面介绍 Future 的用法，本篇的目的主要是是熟悉 vertx 中的异步回调编程风格。为了加深理解，下面我们实现一个自己的异步回调函数，将 jdbc 查询过程封装成异步形式，首先我们给出同步版本的查询函数
+
+```java
+// 查询函数定义
+public ResultSet query(String sql) {
+
+  Statement stat = conn.createStatement();
+  return stat.executeQuery(sql);
+
+}
+
+// 调用函数
+String sql = "select username from table where age = 18";
+ResultSet resultSet = query(sql);
+List<String> names = new ArrayList<>();
+while(resultSet.next()) {
+
+  names.add(resultSet.getString(0));
+
+}
+
+System.out.println(names);
+
+//后续代码
+...
+```
+在上面的代码中，即便后续代码与前面的无关，也必须等到前面的执行完成之后才能开始运行。现在我们把调用函数的代码封装成回调函数，并传给查询函数
+
+```java
+// 异步查询
+public void query(String sql, Function<ResultSet, Void> callback) {
+
+  Statement stat = conn.createStatement();
+  callback.apply(stat.executeQuery(sql));
+
+}
+
+// 调用函数
+String sql = "select username from table where age = 18";
+query(sql, resultSet -> {
+  List<String> names = new ArrayList<>();
+  while(resultSet.next()) {
+
+    names.add(resultSet.getString(0));
+
+  }
+  System.out.println(names);
+  return null;
+})
+
+// 后续代码
+```
+
+可惜的是，上面这段代码只做到了形似异步调用，最关键的 query 函数内部过程仍然在当前线程中执行，并不能立即返回，所以这并不是真正的异步。修改方法也很简单，只需要把 query 函数内部的执行过程放到线程池中执行即可。
+
+从以上的内容来看，异步回调其实是一个很简单的概念，关键是熟悉这种编程风格，我觉得这是学习 vertx 的首要要求。
