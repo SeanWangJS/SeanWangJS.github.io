@@ -239,7 +239,7 @@ double d = 10.0;
 double res = plus10.apply(d);
 System.out.println(res);
 
-plus10.apply(d).apply(res -> System.out.println(res));
+plus10CPS.apply(d).apply(res -> System.out.println(res));
 ```
 
 可以看到，plus10 与 plus10CPS 的区别在于返回值类型不同，前者返回 Double，后者返回 Function<Function<Double, Void>, Void>，而且 cps 函数的使用有一个特点，需要首先 apply 值，然后 apply 一个函数。下面我们定义第二个 cps 函数

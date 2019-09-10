@@ -6,7 +6,7 @@ tags: opencv java 图像处理
 
 remap 是一个非常有意思的函数，它可以将当前图片按我们给出的规则进行变换，这次我们要研究的是怎样使用 remap 函数进行图片的非均匀拉伸，效果如下图所示
 
-![](../resources/2019-07-15-opencv-image-process-nonlinear-stretch/stretch.png)
+![](/resources/2019-07-15-opencv-image-process-nonlinear-stretch/stretch.png)
 
 可以看到，图片右边的拉伸程度极小，并且越往左，拉伸程度逐渐增大。为了实现这样的效果，我们先简单介绍一下 remap 函数，由于我使用的是 opencv 的 java 绑定库，所以这里以 Imgproc 类中的 remap 作为说明原型
 
@@ -71,4 +71,4 @@ $$
     \end{aligned}
     $$
 
-![](../resources/2019-07-15-opencv-image-process-nonlinear-stretch/sin.jpg)
+![](/resources/2019-07-15-opencv-image-process-nonlinear-stretch/sin.jpg)
