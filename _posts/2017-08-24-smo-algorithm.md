@@ -1,7 +1,7 @@
 ---
 layout: post
 title: SMO 算法介绍
-tags: 支持向量机
+tags: 支持向量机 机器学习
 modify_date: 2018-03-05
 ---
 

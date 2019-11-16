@@ -62,7 +62,6 @@ Y = \left[
 y_1 \\y_2\\\vdots\\y_n
 \end{aligned}
 \right]
-
 =\omega_1\left[
 \begin{aligned}
 x_{11} \\x_{21}\\\vdots\\x_{n1}
@@ -73,9 +72,7 @@ x_{11} \\x_{21}\\\vdots\\x_{n1}
 \begin{aligned}
 x_{12} \\x_{22}\\\vdots\\x_{n2}
 \end{aligned}
-\right]
-+ ...
- +
+\right] + ... +
  \omega_d\left[
  \begin{aligned}
  x_{1d} \\x_{2d}\\\vdots\\x_{nd}

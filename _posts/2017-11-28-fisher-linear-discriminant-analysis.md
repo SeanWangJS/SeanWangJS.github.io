@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Fisher 线性判别分析
-tags: 模式识别系列
+tags: 模式识别 机器学习
 ---
 
 设有属于两个类别的 n 个 d 维样本 $$\{x_i\mid \, i \in \{1,2,,n\}\}$$，如果它们线性可分，那么一般可以将它们映射到一维空间，并且同样可识别，类似于下图所示的意思
@@ -119,7 +119,6 @@ S_1^2 &= \sum_{\mathbf{x} \in A_1} (y(\mathbf{x} ) - \bar{r}_1)^2\\
 &= \mathbf{w}^T \sum_{\mathbf{x}\in A_1}(\mathbf{x} - \frac 1 {n_1} \sum_{\mathbf{x}\in A_1}\mathbf{x})(\mathbf{x}^T - \frac 1 {n_1} \sum_{\mathbf{x} \in A_1}\mathbf{x}^T) \mathbf{w}\\
 &=\mathbf{w}^T \sum_{\mathbf{x} \in A_1} (\mathbf{x} - m_1)(\mathbf{x}^T - m_1^T)\mathbf{w}
 \end{aligned}
-
 $$
 
 $$
@@ -135,7 +134,6 @@ $$
 使用 $$S_w$$ 代替括号内那一长串公式，同样也能够通过样本集轻松计算。于是 Fisher 准则函数可以写成
 
 $$
-
 J(\mathbf{w}) = \frac{\mathbf{w}^T S_b \mathbf{w}} {\mathbf{w}^T S_w \mathbf{w}}
 $$
 
