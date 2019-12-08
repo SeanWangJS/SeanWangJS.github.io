@@ -7,7 +7,7 @@ tags: vertx
 
 对于没有接触过的同学来说，Future 的概念不是很显而易见，它的字面意思是“未来”，不像 String、Service、Node、Tree 等等这些直观的概念，很难想象一个叫未来的对象是什么东西。而且 Java、Scala 都实现有原生的 Future，它们和 vertx 有什么区别和联系，也是值得我们去了解的。
 
-所以下面我们就从 Future 最基本的用法开始，逐步搞清楚这一概念究竟解决了什么问题。首先来看 Java 里面的 Future，我们知道，为了提高程序的响应时间，很多耗时操作需要放到子线程中去计算，主线程只用负责接收请求、分发计算任务、返回结果。于是这就涉及到子线程怎么把计算结果返回给主线程的问题，Java 中的 Future 给出的解决方案是用 Future 对象来封装未来的计算结果，它暴露了几个方法
+所以下面我们就从 Future 最基本的用法开始，逐步搞清楚这一概念究竟解决了什么问题。首先来看 Java 里面的 Future，我们知道，为了提高程序的响应时间，很多耗时操作可以放到子线程中去计算，主线程只需要负责接收请求、分发计算任务、返回结果。于是这就涉及到子线程怎么把计算结果返回给主线程的问题，Java 中的 Future 给出的解决方案是用 Future 对象来封装未来的计算结果，它暴露了几个方法
 
 ```java
 // 查询任务是否已经执行完成
@@ -102,16 +102,18 @@ promise.future().setHandler(ar -> {
             }
         });
 
+new Thread(() -> {
+            boolean success = doSomething();
+            if(success) {
+                promise.complete(1);
+            }else {
+                promise.fail("some reason");
+            }
+            
+        }).start();
+
 // doOtherThings()
 
-new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            promise.complete(1);
-        }).start();
 ```
 
 这一过程和上面的伪代码几乎一样，只不过在 vertx 中设置回调函数用的是 setHandler 方法。
