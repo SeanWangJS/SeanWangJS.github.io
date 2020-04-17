@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Opencv 图像处理之非线性拉伸
-tags: opencv java 图像处理
+title: OpenCV 图像处理——非线性拉伸
+tags: opencv 图像处理
 ---
 
 remap 是一个非常有意思的函数，它可以将当前图片按我们给出的规则进行变换，这次我们要研究的是怎样使用 remap 函数进行图片的非均匀拉伸，效果如下图所示
