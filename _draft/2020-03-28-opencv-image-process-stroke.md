@@ -11,7 +11,10 @@ tags: opencv 图像处理
 
 ```java
 /**
- *
+ * Imgproc.java
+ * @param src 原图
+   @param dst 目标图
+   @param kernel 膨胀参数
  */
 public static void dilate(Mat src, Mat dst, Mat kernel)
 ```
