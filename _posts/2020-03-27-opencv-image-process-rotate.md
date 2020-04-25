@@ -63,23 +63,23 @@ Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2BGRA);
 ![](/resources/2020-03-27-opencv-image-process-rotate/try_rotate_4.png)
 
 接下来看第二个问题，如果要求旋转后的图片内容完全显示，则需要旋转后的图片尺寸更大，具体为 
-\[
+$$
   w_d = w_s\cos(\alpha) + h_s \sin(\alpha), \quad h_d = w_s\sin(\alpha) + h_s \cos(\alpha)
-  \]
+  $$
 
 其中 \(w_s, h_s\) 是原图的宽度和高度，\(\alpha\) 为逆时针旋转角度（360度制）。
 
 现在如果尝试把 dst 的尺寸调整为上面计算的值，会发现不起作用，因为根据仿射变换的公式来看
 
-\[
+$$
   dst(i, j) = src(M_{11}i + M_{12}j + M_{13}, M_{21}i + M_{22}j + M_{23})
-  \]
+  $$
 
 单纯的扩大 dst 只会使多余的部分映射到 src 之外的区域，结果还是空白。所以我们只能选择退一步，先得到完整的内容，也就是说在旋转的时候加一定程度的缩放。至于缩放因子，可以用下式计算
 
-\[
+$$
   scale = \min \left(\frac {w_s} {w_d}, \frac {h_s}  {h_d}\right)
-  \]
+  $$
 
 ![](/resources/2020-03-27-opencv-image-process-rotate/try_rotate_5.png)
 
