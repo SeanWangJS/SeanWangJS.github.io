@@ -1,11 +1,12 @@
 ---
+layout: post
 title: OpenCV 图像处理——描边
 tags: opencv 图像处理
 ---
 
 ##### 实现效果
 
-![](preview.png)
+![](/resources/2020-03-28-opencv-image-process-stroke/preview.png)
 
 ##### 关键函数
 
@@ -35,7 +36,7 @@ Mat kernel = Mat.ones(thick, thick, CvType.CV_32S)
 dilate(alpha, alpha, kernel)
 ```
 
-![](alpha_stroke.png)
+![](/resources/2020-03-28-opencv-image-process-stroke/alpha_stroke.png)
 3. 为原始图片填充背景色；
 这一步没有开箱即用的工具方法，需要首先生成纯色图片，然后与原图逐像素以 alpha 通道的值作为权重求和
 
@@ -44,7 +45,7 @@ dilate(alpha, alpha, kernel)
 dst[0] = img[0] * alpha + background[0] * (1 - alpha);
 ```
 
-![](pi_background.png)
+![](/resources/2020-03-28-opencv-image-process-stroke/pi_background.png)
 4. 以膨胀后的 alpha 通道作为填充图的 alpha 通道
 
 ```java
@@ -53,4 +54,4 @@ channels.add(alpha);
 Core.merge(channels, dstMat);
 ```
 
-![](add_background.png)
+![](/resources/2020-03-28-opencv-image-process-stroke/add_background.png)
