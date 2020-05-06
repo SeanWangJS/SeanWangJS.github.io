@@ -1,13 +1,14 @@
 ---
-title: 人脸姿态估计
+layout: post
+title: 人脸姿态估计 (1)
 tags: 计算机视觉
 ---
 
 人脸姿态估计指的是根据一幅2维的人脸图像，计算出这个人在实际3维空间中的面部朝向。问题的输入条件就是一张人脸图片，输出自然就是可以表示方位的三个旋转角度 (pitch, yaw, roll)，其中 pitch 表示俯仰角（关于x轴的旋转角度），yaw 表示偏航角（关于y轴的旋转角度），roll 表示翻滚角（关于z轴的旋转角度），分别如下面 3 图所示：(说句题外话，如果我们把下面图中的物体看作是一架向我们飞来的飞机，就可以理解为何这三个角要如此命名了)
 
-![](pitch.png)
-![](yaw.png)
-![](roll.png)
+![](/resources/2020-04-26-head-pose-estimation/pitch.png)
+![](/resources/2020-04-26-head-pose-estimation/yaw.png)
+![](/resources/2020-04-26-head-pose-estimation/roll.png)
 
 算法的思路很简单，可以考虑这样一种场景，假设我们有一张标准的3d人脸模型，如果投影和输入图片的人脸大致重合，那么此时 3d 模型的方位就可以看作是图片中人脸在实际空间中的方位了。如果投影和图像的差异很大，那我们再对 3d 模型进行旋转，平移，拉伸等操作，可以明确的是，只要经过合适的调整，总会出现两者相重合的情况。
 
@@ -15,20 +16,18 @@ tags: 计算机视觉
 
 我们先来看第二个问题，在数学上，旋转、平移、拉伸操作其实都是矩阵运算，举个简单的例子，在二维平面上旋转一条线段，就是使用旋转目标 src 去乘以二维旋转矩阵，得到的 dst 便是旋转后的线段。
 
-![](rotation.png)
-
-
+![](/resources/2020-04-26-head-pose-estimation/rotation.png)
 
 平移操作更简单一点，在坐标分量上加一个偏移量即可。拉伸也同理，只需要在不同的方向上乘以缩放系数。于是，空间中的一个对象，经过上述变换后，最终得到的东西由下式给出
 
-\[
+$$
   dst = (src \cdot R + t)\cdot s
-  \]
+  $$
 
-其中 \(t\) 是平移矩阵，大小为 \(n\times 3\)，它的每一列数值为常量，是对应方向上的移动距离
+其中 \\(t\\) 是平移矩阵，大小为 \\(n\times 3\\)，它的每一列数值为常量，是对应方向上的移动距离
 
 
-\[
+$$
     t=\left[
     \begin{aligned}
     &dx  &dy\quad&dz\\
@@ -37,11 +36,11 @@ tags: 计算机视觉
     &...& ... \quad &...
     \end{aligned}
     \right]
-  \]
+  $$
 
-\(s\) 是缩放向量，具体形式为 
+\\(s\\) 是缩放向量，具体形式为 
 
-\[
+$$
   s=\left[
     \begin{aligned}
     \lambda_x \quad 0\quad 0\\
@@ -49,13 +48,13 @@ tags: 计算机视觉
     0\quad 0\quad \lambda_z
     \end{aligned}
     \right]
-  \]
+  $$
 
-这里的 \(\lambda_x, \lambda_y,\lambda_z\) 是三个方向上的缩放系数。
+这里的 \\(\lambda_x, \lambda_y,\lambda_z\\) 是三个方向上的缩放系数。
 
-下面我们重点讨论一下旋转矩阵 \(R\) 的形式，与二维情况不同的是，三维旋转有三个旋转轴，针对每一个旋转轴都有一个旋转矩阵形式，具体来说
+下面我们重点讨论一下旋转矩阵 \\(R\\) 的形式，与二维情况不同的是，三维旋转有三个旋转轴，针对每一个旋转轴都有一个旋转矩阵形式，具体来说
 
-\[
+$$
     R_x=\left[
     \begin{aligned}
     &1  &0&\quad 0\\
@@ -63,9 +62,9 @@ tags: 计算机视觉
     &0  &\sin(\alpha) &\quad \cos(\alpha)
     \end{aligned}
     \right]
-  \]
+  $$
 
-\[
+$$
     R_y=\left[
     \begin{aligned}
     &\cos(\beta)  &0&\quad -sin(\beta)\\
@@ -73,9 +72,9 @@ tags: 计算机视觉
     &\sin(\beta)  &0 &\quad \cos(\beta)
     \end{aligned}
     \right]
-  \]
+  $$
 
-\[
+$$
     R_z=\left[
     \begin{aligned}
     &\cos(\gamma)  &-sin(\gamma)&\quad 0\\
@@ -83,37 +82,37 @@ tags: 计算机视觉
     &0  &0 &\quad 1\quad 
     \end{aligned}
     \right]
-  \]
+  $$
 
-其中 \(\alpha, \beta,\gamma\) 分别是关于 \(x,y,z\) 轴的旋转角度，最终的旋转矩阵是上述这三个矩阵相乘之积
+其中 \\(\alpha, \beta,\gamma\\) 分别是关于 \\(x,y,z\\) 轴的旋转角度，最终的旋转矩阵是上述这三个矩阵相乘之积
 
-\[
+$$
   R = R_x R_y R_z
-  \]
+  $$
 
-于是经过变换后的模型就是 \(\alpha, \beta, \gamma, \lambda_x, \lambda_y, \lambda_z, dx, dy, dz\) 这些变量的函数
+于是经过变换后的模型就是 \\(\alpha, \beta, \gamma, \lambda_x, \lambda_y, \lambda_z, dx, dy, dz\\) 这些变量的函数
 
-\[
+$$
   dst(\alpha, \beta, \gamma, \lambda_x, \lambda_y, \lambda_z, dx, dy, dz) = (src \cdot R + t)\cdot s
-  \]
+  $$
 
 搞定了标准 3d 人脸模型的变换之后，接下来我们来解决如何量化投影与人脸图像重叠的问题。由于 3d 模型其实就是一系列点坐标，所以我们首先也应该把二维人脸图像使用点坐标来表示。关于人脸关键点检测的算法有很多，这里我们使用 dlib 框架提供的 68 点检测模型，效果图如下
-![](tifa_face_landmark.png)
+![](/resources/2020-04-26-head-pose-estimation/tifa_face_landmark.png)
 
-下面我们给出有 68 个关键点的[标准3d人脸模型](standard_face_landmark.csv)，它看起来就像下面这样
+下面我们给出有 68 个关键点的[标准3d人脸模型](/resources/2020-04-26-head-pose-estimation/standard_face_landmark.csv)，它看起来就像下面这样
 
-![](standard_3d_face.png)
+![](/resources/2020-04-26-head-pose-estimation/standard_3d_face.png)
 
 有了标准人脸关键点之后，我们需要对其进行空间变换，也就是前面推导的
 
-\[
+$$
   dst = (src \cdot R + t)\cdot s
-  \]
+  $$
 
 然后再将其投影到 xy 平面上，当然这个投影矩阵比较简单，只需要提取 dst 中每个点的前两个坐标就可以了
 
 
-\[
+$$
     prj=\left[
     \begin{aligned}
     &1 \quad 0\\
@@ -121,38 +120,38 @@ tags: 计算机视觉
     &0  \quad 0 
     \end{aligned}
     \right]
-  \]
+  $$
 
 投影后的点集合为
 
-\[
+$$
   dst_{p} = dst \cdot prj
-  \]
+  $$
 
 为了衡量投影与图片人脸关键点的重合程度，我们采用平方误差损失函数
 
-\[
+$$
   \begin{aligned}
 L &= \frac 1 n \sum_{i=1} \mid\mid dst_p(i) - p_i \mid\mid^2\\
 &= \frac 1 n \sum_{i=1}^n \mid\mid (src_i \cdot R + t_i)\cdot s \cdot prj - p_i \mid\mid^2
   \end{aligned}
-  \]
+  $$
 
-其中 \(p_i\) 是人脸图像第 i 个关键点的坐标。于是最终要求解的问题便为
+其中 \\(p_i\\) 是人脸图像第 i 个关键点的坐标。于是最终要求解的问题便为
 
-\[
+$$
   \alpha,\beta, \gamma = \arg \min_{\alpha, \beta, \gamma} L(\alpha, \beta, \gamma, \lambda_x, \lambda_y, \lambda_z, dx, dy, dz)
-  \]
+  $$
 
 下面我们采用梯度下降法来求解，参数迭代格式为 
 
-\[
+$$
   p = p - \eta \frac{\partial L}{\partial p}
-  \]
+  $$
 
-其中 \(\eta\) 是学习速率，\(p\) 代表一种参数，也就是前面的 \(\alpha,\beta...\) 等等，经过多次迭代，\(L\) 应该能收敛到一个稳定值，此时便完成了整个优化过程。
+其中 \\(\eta\\) 是学习速率，\\(p\\) 代表一种参数，也就是前面的 \\(\alpha,\beta...\\) 等等，经过多次迭代，\\(L\\) 应该能收敛到一个稳定值，此时便完成了整个优化过程。
 
-接下来，利用上述思路，我们来实际编程试验一下，由于目标函数 \(L\) 的形式还是有点复杂，手动求导不太现实，所以这里我们采用 pytorch 来完成自动求导的功能，首先是定义上面提到的几个参数
+接下来，利用上述思路，我们来实际编程试验一下，由于目标函数 \\(L\\) 的形式还是有点复杂，手动求导不太现实，所以这里我们采用 pytorch 来完成自动求导的功能，首先是定义上面提到的几个参数
 
 ```python
 alpha = torch.tensor(0.0, requires_grad=True, dtype=torch.float64)
@@ -296,11 +295,11 @@ for i in range(iter):
 
 这里我们把学习率设的很小，否则结果不收敛。下面我们用 zack 的脸来跑个例子
 
-![](zack.png)
+![](/resources/2020-04-26-head-pose-estimation/zack.png)
 
-首先根据原图来看，zack脸部大致是朝左斜向下的，具体来说，俯仰角（绕 x 轴） \(-\pi/2< pitch <0\)，偏航角（绕y轴）\(-\pi/2< yaw < 0\)，翻滚角（绕z轴）几乎为 0。当然我这里给的范围比较粗糙，主要是为了检验算法是否会得出离谱的结果。
+首先根据原图来看，zack脸部大致是朝左斜向下的，具体来说，俯仰角（绕 x 轴） \\(-\pi/2< pitch <0\\)，偏航角（绕y轴）\\(-\pi/2< yaw < 0\\)，翻滚角（绕z轴）几乎为 0。当然我这里给的范围比较粗糙，主要是为了检验算法是否会得出离谱的结果。
 
-![](face_prj.png)
+![](/resources/2020-04-26-head-pose-estimation/face_prj.png)
 
 上图左边是原图的人脸关键点，右边是学习出来的结果，两者的面部方向有点差异，但大致上是相同的，可见，我们这个算法有一定效果。当然这只是比较粗糙的实验，用于说明方案的可行性，这里具体的优化算法显得有点暴力，所以时间效率不是很好，后面我们将研究 opencv 所使用的方法。
 

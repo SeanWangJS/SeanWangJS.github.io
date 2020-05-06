@@ -18,7 +18,6 @@ tags: 模式识别 机器学习
 
 $$
 \mathbf{w}^T \mathbf{x} + b = 0
-
 $$
 
 对于空间中的任意点 $$\mathbf{x}$$，设其在上述面上的投影点为 $$\mathbf{x}_p$$，并且离面的垂直距离为 $$r$$。那么就有关系
@@ -40,7 +39,6 @@ $$
 y(\mathbf{x}) &= \mathbf{w}^T (\mathbf{x}_p +r\frac {\mathbf{w}}{||\mathbf{w}||}) + b\\
 &= \mathbf{w}^T \mathbf{x}_p + b + r ||\mathbf{w}||\\
 &=r ||\mathbf{w}||
-
 \end{aligned}
 $$
 
