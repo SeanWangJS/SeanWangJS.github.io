@@ -46,7 +46,7 @@ yolo 网络受到 GoogleNet 的启发，引入了一个简化版的 inception �
 
 损失函数采用简单易优化的平方损失，但由于网络输出的结构中，每个向量由几个不同含义的数据组成，因此总体损失的计算也应该分成几个不同的部分。下面我们逐个叙述。
 
-首先是对于边界框中心偏移预测值 \(d_x, d_y\)，假设其 Ground Truth 为 \(\hat{d}_x, \hat{d}_y\)，那么损失为 \((d_x - \hat{d}_x)^2 + (d_y-\hat{d_y})^2\)。由于我们前面约定了每个格子预测 B 个物体边界框，所以需要找到一个最优预测来计算，在这里可以用预测框与格子的交并比来确定。定义 \(\mathbb{I}_{ij}^{obj}\) 为第 \(i\) 个格子的第 \(j\) 个预测为最优预测的指示变量，也就是说，如果第 \(i\) 个格子的所有预测中，如果第 \(j\) 个预测与格子的交并比最大，那么 \(\mathbb{I}_{ij}^{obj} = 1\) ，否则 \(\mathbb{I}_{ij}^{obj} = 0\)，利用这样的约定，我们可以得出关于中心偏移预测的总体损失
+首先是对于边界框中心偏移预测值 \(d_x, d_y\)，假设其 Ground Truth 为 \(\hat{d}_x, \hat{d}_y\)，那么损失为 \((d_x - \hat{d}_x)^2 + (d_y-\hat{d_y})^2\)。在前面，我们约定了每个格子预测 B 个物体边界框，但是只有一个最优预测，在这里使用预测框与格子的交并比来确定。定义 \(\mathbb{I}_{ij}^{obj}\) 为第 \(i\) 个格子的第 \(j\) 个预测为最优预测的指示变量，也就是说，第 \(i\) 个格子的所有预测中，如果第 \(j\) 个预测与格子的交并比最大，那么 \(\mathbb{I}_{ij}^{obj} = 1\) ，否则 \(\mathbb{I}_{ij}^{obj} = 0\)，利用这样的约定，我们可以得出关于中心偏移预测的总体损失
 
 \[
 \lambda_{coor} \sum_{i = 1}^{S^2} \sum_{j = 1}^B \mathbb{I}_{ij}^{obj} \left[(d_{x_j} - \hat{d}_x)^2 + (d_{y_j} - \hat{d}_y)^2\right]
@@ -98,7 +98,7 @@ yolo 网络受到 GoogleNet 的启发，引入了一个简化版的 inception �
   \begin{aligned}
   &\lambda_{coor} \sum_{i = 1}^{S^2} \sum_{j = 1}^B \mathbb{I}_{ij}^{obj} \left[(d_{x_j} - \hat{d}_x)^2 + (d_{y_j} - \hat{d}_y)^2\right] \\
   &+  \lambda_{coor} \sum_{i = 1}^{S^2} \sum_{j = 1}^B \mathbb{I}_{ij}^{obj} \left[(\sqrt{w_j} - \sqrt{\hat{w}})^2 + (\sqrt{h_j} - \sqrt{\hat{h}})^2\right] \\
-  &+\sum_{i=1}^{S^2} \mathbb{I}_{i}^{obj} \left(  C_i - \hat{C}_i\right)^2 +\lambda_{noobj} \sum_{i=1}^{S^2} \mathbb{I}_{i}^{noobj} \left(  C_i - \hat{C}_i\right)^2\\
+  &+\sum_{i=1}^{S^2} \mathbb{I}_{ij}^{obj} \left(  C_i - \hat{C}_i\right)^2 +\lambda_{noobj} \sum_{i=1}^{S^2} \mathbb{I}_{i}^{noobj} \left(  C_i - \hat{C}_i\right)^2\\
   &+ \sum_{i = 1}^{S^2} \mathbb{I}_{i}^{obj} \sum_{c \in classes} \left( p_i(c \mid o) -  \hat{p}_i(c \mid o)\right)^2
   \end{aligned}
   \]
