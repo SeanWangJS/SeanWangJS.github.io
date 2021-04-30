@@ -208,11 +208,11 @@ def res_layer(block, in_channel, out_channel, num_layers):
 
 特征图尺寸的参数由 kernel_size, stride 和 padding 来控制，根据公式 
 
-\[
+$$
   M = \frac {N + 2 p - k}{s} + 1
-  \]
+  $$
 
-当 \(M = N\)，即特征图尺寸不变时，可以有 \(k = 3, p = 1, s = 1\)，当 \(M = \frac N 2\) 时，可以有 \(k = 3, p = 1, s = 2\)。
+当 \\(M = N\\)，即特征图尺寸不变时，可以有 \\(k = 3, p = 1, s = 1\\)，当 \\(M = \frac N 2\\) 时，可以有 \\(k = 3, p = 1, s = 2\\)。
 
 对于 basic block 来说，它有两个 3x3 卷积层，只需要在第一个卷积层控制特征图尺寸变化，第二个卷积层不改变通道数和特征图尺寸
 
