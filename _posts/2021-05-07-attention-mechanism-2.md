@@ -5,38 +5,6 @@ tags: 循环神经网络 注意力机制
 
 在上一篇文章中，不太正式地介绍了注意力机制，我们从概念上了解到注意力机制的实质是在输出每个预测单词的时候输入单词有不同的权重，本篇文章希望从算法角度来进一步解释。
 
-<!-- ##### 语言模型
-
-从定义上来看，语言模型指的是一个单词序列成为合法语句的概率 \\(p(x_1, x_2, ,,, x_T)\\)，根据贝叶斯公式，这个概率公式又可以写作
-
-$$
-  p(x_1, x_2,,,x_T) = p(x_1)p(x_2\mid x_1)... p(x_{T}\mid x_{T-1},,,x_1)
-  $$
-
-或者写成求积形式
-
-$$
-  p(x_1, x_2,,,x_T) = \prod_{t=1}^T p(x_t\mid x_{t-1},,, x_1)
-  $$
-
-
-
-##### 统计机器翻译
-
-翻译的本质是将源语言的词语序列变换成目标语言的词语序列，假如有一个翻译模型 \\(\rho_{\theta}\\)，给定输入序列 \\(\mathbf{x} = x_1, x_2,,,x_T\\)，输出序列为 \\(\mathbf{y} = y_1, y_2,,, y_{T'}\\) ，从统计学上，这种情况发生的概率为
-
-$$
-  p_{\theta}(\mathbf{y}\mid \mathbf{x})
-  $$
-
-其中 \\(\theta\\) 是翻译模型的内部参数，显然不同的参数导致的概率也不同，而机器翻译要解决的问题就是找到这样的参数，使得下述对数似然函数极大
-
-$$
-  \theta = \argmax_{\theta} \frac{1} {N} \sum_{i=0}^N \log p_\theta(\mathbf{y}_i\mid \mathbf{x}_i)
-  $$
-
-其中 \\(\{(\mathbf{x}_i, \mathbf{y}_i)\mid i = 0,,, n\}\\) 为训练集。 -->
-
 ##### 基于 RNN 的 Encoder-Decoder 结构
 
 **Kyunghyun Cho** 在论文 [Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation](https://arxiv.org/abs/1406.1078) 中提出了基于 RNN 的 Encoder-Decoder 结构，它的编码器是一个 RNN，在时刻 \\(t\\) 的隐层状态为
@@ -129,10 +97,139 @@ $$
 其公式如下
 
 $$
-  e_{ji} = v\cdot \tanh(W h_{j-1} + U h_i)
+  e_{ji} = v \tanh(W h'_{j-1} + U h_i)
   $$
 
-这个小型的神经网络同总体模型一起训练，这就是该篇论文的标题 (Jointly Learning to Align and Translate) 的含义，即对齐模型与翻译模型的联合训练。
+其中\\(W, U, v\\) 都是参数，而\\(W, U\\) 的形状为\\(m \times n\\)，\\(v\\) 的形状为\\(1\times m\\)，\\(n\\) 为隐层向量的维度，这个小型的神经网络同总体模型一起训练，也就是该篇论文的标题 (Jointly Learning to Align and Translate) 的含义，即对齐模型与翻译模型的联合训练。
 
+最后，我们尝试把计算过程写成矩阵形式，首先是对齐模型
+
+$$
+  \begin{aligned}
+  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
+    &= v \tanh([Wh'_{j-1} + Uh_1 \quad Wh'_{j-1} + Uh_2 \quad ... \quad Wh'_{j-1} + Uh_T])\\
+    &= v \tanh(W\vec{h}'_{j-1} + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
+    &= v \tanh(W\vec{h}'_{j-1} + U[h_1 \quad h_2 \quad ... \quad h_T])\\
+    &= v \tanh(W\vec{h}'_{j-1} + UH) 
+  \end{aligned}
+  $$
+
+关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，\\(\vec{h}'_{j-1} = [h'_{j-1} \quad h'_{j-1} \quad ... \quad h'_{j-1}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
+
+$$
+  \begin{aligned}
+  c_j &= \sum_{i = 1}^T \alpha_{ji} h_i \\
+  &= [\alpha_{j1}\quad \alpha_{j2} \quad ... \quad \alpha_{jT}] [h_1 \quad h_2 \quad ... \quad h_T]^\top  \\
+  &=\alpha_j H^\top
+  \end{aligned}
+  $$
+
+最后是由注意力向量组成的矩阵
+$$
+  \begin{aligned}
+  c &= [c_1 \quad c_2 \quad ... \quad c_{T'}] \\
+  &= [\alpha_1 H^\top \quad \alpha_2 H^\top \quad ... \quad \alpha_{T'} H^\top]\\
+  & = \alpha H^\top
+  \end{aligned}
+  $$
+
+其中
+
+$$
+  \begin{aligned}
+  \alpha &= [\alpha_1 \quad \alpha_2 \quad ... \quad \alpha_{T'}] \\
+  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
+  &= softmax(v \tanh([W \vec h'_0 + UH \quad W \vec h'_1 + UH \quad ... \quad W \vec h'_{T'-1} + UH ]))\\
+  &= softmax(v \tanh(W \vec{H}' + U \vec H))
+  \end{aligned}
+  $$
+
+所以最终注意力矩阵为
+
+$$
+  c = softmax(v \tanh(W \vec{H}' + U \vec H)) H^\top
+  $$
+这里的\\(\vec{H}'\\) 和\\(\vec{H}\\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\\)，其中
+$$
+  \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}]
+  $$
+
+$$
+  \vec{H} = [H \quad H \quad ... \quad H]
+  $$
+<!-- 这里的\\(\vec{H}'\) 和\\(\vec{H}\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\)，其中
+$$
+  \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}] =\left[ 
+    \left[
+    \begin{aligned}
+      h'_{01} \quad h'_{01} \quad ...\quad h'_{01} \\
+      h'_{02} \quad h'_{02} \quad ...\quad h'_{02} \\
+      ...\\
+      h'_{0n} \quad h'_{0n} \quad ...\quad h'_{0n}
+    \end{aligned}
+  \right] \quad 
+  \left[
+    \begin{aligned}
+      h'_{11} \quad h'_{11} \quad ...\quad h'_{11} \\
+      h'_{12} \quad h'_{12} \quad ...\quad h'_{12} \\
+      ...\\
+      h'_{1n} \quad h'_{1n} \quad ...\quad h'_{1n}
+    \end{aligned}
+  \right] \quad ... 
+  \left[
+    \begin{aligned}
+      h'_{T'-1,1} \quad h'_{T'-1,1} \quad ...\quad h'_{T'-1,1} \\
+      h'_{T'-1,2} \quad h'_{T'-1,2} \quad ...\quad h'_{T'-1,2} \\
+      ...\\
+      h'_{T'-1,n} \quad h'_{T'-1,n} \quad ...\quad h'_{T'-1,n}
+    \end{aligned}
+  \right]
+  \right]
+  $$
+
+$$
+  \vec{H} = [H \quad H \quad ... \quad H] =\left[ 
+    \left[
+    \begin{aligned}
+      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
+      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
+      ...\\
+      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
+    \end{aligned}
+  \right] \quad 
+  \left[
+    \begin{aligned}
+      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
+      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
+      ...\\
+      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
+    \end{aligned}
+  \right] \quad ... 
+  \left[
+    \begin{aligned}
+      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
+      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
+      ...\\
+      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
+    \end{aligned}
+  \right]
+  \right]
+  $$
+
+$$
+  \begin{aligned}
+  W\vec{H}' + U\vec{H} &= [W\vec{h}'_0 \quad W\vec{h}'_1 \quad ... \quad W\vec{h}'_{T'-1}] + [U H \quad UH \quad ... \quad UH]\\
+  &= [[Wh'_0 \quad Wh'_0 \quad ... \quad Wh'_0] \quad [Wh'_1 \quad Wh'_1 \quad ... \quad Wh'_1] \quad ... \quad [Wh'_{T'-1} \quad Wh'_{T'-1} \quad ... \quad Wh'_{T'-1}]] \\
+  &+[[UH \quad UH \quad ... \quad UH]\quad [UH \quad UH \quad ... \quad UH]\quad ... \quad [UH \quad UH \quad ... \quad UH]]
+  \end{aligned}
+  $$
+
+$$
+  \begin{aligned}
+  v\tanh(W\vec{H}' + U\vec{H}) &= [[v\tanh(Wh'_0) \quad Wh'_0 \quad ... \quad Wh'_0] \quad [Wh'_1 \quad Wh'_1 \quad ... \quad Wh'_1] \quad ... \quad [Wh'_{T'-1} \quad Wh'_{T'-1} \quad ... \quad Wh'_{T'-1}]] \\
+  &+[[UH \quad UH \quad ... \quad UH]\quad [UH \quad UH \quad ... \quad UH]\quad ... \quad [UH \quad UH \quad ... \quad UH]]
+  \end{aligned}
+  $$ -->
 ##### 总结
+
 本文主要介绍了 Kyunghyun Cho 和 Dzmitry Bahdanau 两篇论文的主要想法，简单地说，Kyunghyun Cho 提出了基于 Encoder-Decoder 的机器翻译模型结构，而 Bahdanau 则在此基础上引入了注意力机制，以及与之相关的对齐模型。本文还尝试解释了 Bahdanau 使用双向 RNN 结构的原因，即为了获取更完整的语义从而更好地利用对齐模型。
