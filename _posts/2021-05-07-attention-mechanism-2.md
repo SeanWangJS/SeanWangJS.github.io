@@ -151,7 +151,9 @@ $$
 $$
   c = softmax(v \tanh(W \vec{H}' + U \vec H)) H^\top
   $$
+  
 这里的\\(\vec{H}'\\) 和\\(\vec{H}\\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\\)，其中
+
 $$
   \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}]
   $$
@@ -160,7 +162,7 @@ $$
   \vec{H} = [H \quad H \quad ... \quad H]
   $$
 
-<!-- ##### 考虑另一种对齐模型
+##### 考虑另一种对齐模型
 
 在之前的讨论中，我们使用的是 Bahdanau 原论文中的前馈网络对齐模型，但实际上，更为简单的对齐模型是直接计算两个参数向量的点积，即
 
@@ -176,122 +178,9 @@ $$
   &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
   &= 
   \end{aligned}
-  \] -->
-
-<!-- 上述计算中提到的对齐模型又叫加法模型，事实上，对齐模型不止一种形式，在 google 关于 Transformer 的论文 [Attention Is All You Need](https://arxiv.org/abs/1706.03762) 中，提到了点积模型，即
-
-\[
-  e_{ji} = a(h_i, h_{j-1}) = h_i^\top h_{j-1}
   \]
 
-现将其带入注意力的计算，首先
 
-\[
-   \begin{aligned}
-  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
-    &= h_{j-1}^\top [h_1 \quad h_2 \quad ... \quad h_T] \\
-    & = h_{j-1}^\top H
-  \end{aligned}
-  \]
-
-然后
-
-\[
-    \begin{aligned}
-  \alpha &= [\alpha_1 \quad \alpha_2 \quad ... \quad \alpha_{T'}] \\
-  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
-  &= softmax([h_0^\top \quad h_1^\top \quad ... \quad h_{T'-1}^\top]H)\\
-  &= softmax(H'^\top H)
-  \end{aligned}
-  \]
-
-最后得到
-
-\[
-  c = \alpha H^\top  = softmax(H'^\top H) H^\top
-  \]
-
-当然，原论文采用的是缩放点积模型
-
-\[
-  c = \alpha H^\top  = softmax(\frac{H'^\top H}{\sqrt{d_k}}) H^\top
-  \] -->
-
-
-
-<!-- 这里的\\(\vec{H}'\) 和\\(\vec{H}\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\)，其中
-$$
-  \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}] =\left[ 
-    \left[
-    \begin{aligned}
-      h'_{01} \quad h'_{01} \quad ...\quad h'_{01} \\
-      h'_{02} \quad h'_{02} \quad ...\quad h'_{02} \\
-      ...\\
-      h'_{0n} \quad h'_{0n} \quad ...\quad h'_{0n}
-    \end{aligned}
-  \right] \quad 
-  \left[
-    \begin{aligned}
-      h'_{11} \quad h'_{11} \quad ...\quad h'_{11} \\
-      h'_{12} \quad h'_{12} \quad ...\quad h'_{12} \\
-      ...\\
-      h'_{1n} \quad h'_{1n} \quad ...\quad h'_{1n}
-    \end{aligned}
-  \right] \quad ... 
-  \left[
-    \begin{aligned}
-      h'_{T'-1,1} \quad h'_{T'-1,1} \quad ...\quad h'_{T'-1,1} \\
-      h'_{T'-1,2} \quad h'_{T'-1,2} \quad ...\quad h'_{T'-1,2} \\
-      ...\\
-      h'_{T'-1,n} \quad h'_{T'-1,n} \quad ...\quad h'_{T'-1,n}
-    \end{aligned}
-  \right]
-  \right]
-  $$
-
-$$
-  \vec{H} = [H \quad H \quad ... \quad H] =\left[ 
-    \left[
-    \begin{aligned}
-      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
-      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
-      ...\\
-      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
-    \end{aligned}
-  \right] \quad 
-  \left[
-    \begin{aligned}
-      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
-      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
-      ...\\
-      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
-    \end{aligned}
-  \right] \quad ... 
-  \left[
-    \begin{aligned}
-      h_{11} \quad h_{21} \quad ...\quad h_{n1} \\
-      h_{12} \quad h_{22} \quad ...\quad h_{n2} \\
-      ...\\
-      h_{1n} \quad h_{2n} \quad ...\quad h_{nn}
-    \end{aligned}
-  \right]
-  \right]
-  $$
-
-$$
-  \begin{aligned}
-  W\vec{H}' + U\vec{H} &= [W\vec{h}'_0 \quad W\vec{h}'_1 \quad ... \quad W\vec{h}'_{T'-1}] + [U H \quad UH \quad ... \quad UH]\\
-  &= [[Wh'_0 \quad Wh'_0 \quad ... \quad Wh'_0] \quad [Wh'_1 \quad Wh'_1 \quad ... \quad Wh'_1] \quad ... \quad [Wh'_{T'-1} \quad Wh'_{T'-1} \quad ... \quad Wh'_{T'-1}]] \\
-  &+[[UH \quad UH \quad ... \quad UH]\quad [UH \quad UH \quad ... \quad UH]\quad ... \quad [UH \quad UH \quad ... \quad UH]]
-  \end{aligned}
-  $$
-
-$$
-  \begin{aligned}
-  v\tanh(W\vec{H}' + U\vec{H}) &= [[v\tanh(Wh'_0) \quad Wh'_0 \quad ... \quad Wh'_0] \quad [Wh'_1 \quad Wh'_1 \quad ... \quad Wh'_1] \quad ... \quad [Wh'_{T'-1} \quad Wh'_{T'-1} \quad ... \quad Wh'_{T'-1}]] \\
-  &+[[UH \quad UH \quad ... \quad UH]\quad [UH \quad UH \quad ... \quad UH]\quad ... \quad [UH \quad UH \quad ... \quad UH]]
-  \end{aligned}
-  $$ -->
 ##### 总结
 
 本文主要介绍了 Kyunghyun Cho 和 Dzmitry Bahdanau 两篇论文的主要想法，简单地说，Kyunghyun Cho 提出了基于 Encoder-Decoder 的机器翻译模型结构，而 Bahdanau 则在此基础上引入了注意力机制，以及与之相关的对齐模型。本文还尝试解释了 Bahdanau 使用双向 RNN 结构的原因，即为了获取更完整的语义从而更好地利用对齐模型。
