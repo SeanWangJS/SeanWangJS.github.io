@@ -127,6 +127,7 @@ $$
   $$
 
 最后是由注意力向量组成的矩阵
+
 $$
   \begin{aligned}
   c &= [c_1 \quad c_2 \quad ... \quad c_{T'}] \\
@@ -151,7 +152,7 @@ $$
 $$
   c = softmax(v \tanh(W \vec{H}' + U \vec H)) H^\top
   $$
-  
+
 这里的\\(\vec{H}'\\) 和\\(\vec{H}\\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\\)，其中
 
 $$
@@ -174,11 +175,27 @@ $$
 
 \[
   \begin{aligned}
-  \alpha &= [\alpha_1\quad \alpha_2 \quad ... \quad \alpha_{T'}]\\
-  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
-  &= 
+  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}] \\
+  &= [{h'}_{j-1}^\top h_1 \quad {h'}_{j-1}^\top h_2 \quad ... \quad {h'}_{j-1}^\top h_T] \\
+  &= {h'}_{j-1}^\top[ h_1 \quad h_2 \quad ...\quad h_T]\\
+  &= {h'}_{j-1}^\top H
   \end{aligned}
   \]
+
+\[
+  \begin{aligned}
+  \alpha &= [\alpha_1\quad \alpha_2 \quad ... \quad \alpha_{T'}]\\
+  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
+  &= softmax([{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]H)\\
+  &= softmax(H'H)
+  \end{aligned}
+  \]
+
+\[
+  c = \alpha H^\top = softmax(H'H) H^\top
+  \]
+
+其中 \(H' = [{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]\)
 
 
 ##### 总结
