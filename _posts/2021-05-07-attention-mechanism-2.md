@@ -102,6 +102,8 @@ $$
 
 其中\\(W, U, v\\) 都是参数，而\\(W, U\\) 的形状为\\(m \times n\\)，\\(v\\) 的形状为\\(1\times m\\)，\\(n\\) 为隐层向量的维度，这个小型的神经网络同总体模型一起训练，也就是该篇论文的标题 (Jointly Learning to Align and Translate) 的含义，即对齐模型与翻译模型的联合训练。
 
+##### 注意力计算的矩阵形式
+
 最后，我们尝试把计算过程写成矩阵形式，首先是对齐模型
 
 $$
@@ -157,6 +159,66 @@ $$
 $$
   \vec{H} = [H \quad H \quad ... \quad H]
   $$
+
+<!-- ##### 考虑另一种对齐模型
+
+在之前的讨论中，我们使用的是 Bahdanau 原论文中的前馈网络对齐模型，但实际上，更为简单的对齐模型是直接计算两个参数向量的点积，即
+
+\[
+  a(h_i, h'_{j-1}) = {h'}_{j-1}^\top h_i
+  \]
+
+那么可以得到 
+
+\[
+  \begin{aligned}
+  \alpha &= [\alpha_1\quad \alpha_2 \quad ... \quad \alpha_{T'}]\\
+  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
+  &= 
+  \end{aligned}
+  \] -->
+
+<!-- 上述计算中提到的对齐模型又叫加法模型，事实上，对齐模型不止一种形式，在 google 关于 Transformer 的论文 [Attention Is All You Need](https://arxiv.org/abs/1706.03762) 中，提到了点积模型，即
+
+\[
+  e_{ji} = a(h_i, h_{j-1}) = h_i^\top h_{j-1}
+  \]
+
+现将其带入注意力的计算，首先
+
+\[
+   \begin{aligned}
+  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
+    &= h_{j-1}^\top [h_1 \quad h_2 \quad ... \quad h_T] \\
+    & = h_{j-1}^\top H
+  \end{aligned}
+  \]
+
+然后
+
+\[
+    \begin{aligned}
+  \alpha &= [\alpha_1 \quad \alpha_2 \quad ... \quad \alpha_{T'}] \\
+  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
+  &= softmax([h_0^\top \quad h_1^\top \quad ... \quad h_{T'-1}^\top]H)\\
+  &= softmax(H'^\top H)
+  \end{aligned}
+  \]
+
+最后得到
+
+\[
+  c = \alpha H^\top  = softmax(H'^\top H) H^\top
+  \]
+
+当然，原论文采用的是缩放点积模型
+
+\[
+  c = \alpha H^\top  = softmax(\frac{H'^\top H}{\sqrt{d_k}}) H^\top
+  \] -->
+
+
+
 <!-- 这里的\\(\vec{H}'\) 和\\(\vec{H}\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\)，其中
 $$
   \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}] =\left[ 
