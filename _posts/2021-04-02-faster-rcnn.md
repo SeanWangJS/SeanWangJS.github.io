@@ -121,7 +121,7 @@ $$
 
 然后我们再来看看这个 ROI Pooling 操作，在 Fast R-CNN 中，我们提到，ROI Pooling 是 SPP Layer 的简化版本，只有一路输出，通过事先定义的输出尺寸来进行最大化池化操作，具体如下图所示
 
-![](/resources/2021-04-02-faster-rcnn//resources/2021-04-02-faster-rcnn/faster-rcnn_roi-pooling.png)
+![](/resources/2021-04-02-faster-rcnn/faster-rcnn_roi-pooling.png)
 
 通过 ROI Pooling 层，无论多大的 ROI 区域都会生成相同尺寸的向量，后续再进入全连接层进行分类和边界框回归任务。
 
