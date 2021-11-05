@@ -49,26 +49,38 @@ lines = cv2.HoughLinesP(img_canny, 1, np.pi/180, 10, minLineLength=10, maxLineGa
 连通分量就是由所有能够相互连接的 Vertex 组成的子图，我们的任务就是找到所有的孤立子图，下面我们采用深度优先搜索来解决该问题：
 
 1. 初始化数组 visited，长度等于 Vertex 数量，全部设置为 0，标记所有访问过的节点；
-2. 初始化变量 compoent_id = 1，作为连通分量id。
-3. 声明一个空栈 stack 用于存储 Vertex id，然后将 0 入栈。
+2. 初始化变量 compoent_id = 1，作为连通分量id；
+3. 声明一个空栈 stack 用于存储 Vertex id，然后将 0 入栈；
 4. 如果 stack 不为空，则循环：
-  a. 将 stack 顶部的 Vertex id 出栈，然后查看邻接矩阵的相应行，如果该行的所有元素都为 0，则说明该 Vertex 是孤立的，将 visited 的相应位置标设为 component_id，然后 component_id 自增 1。如果该行含有非 0 元素，则将该行的所有非 0 位置入栈，并将 visited 的相应位置标设为 component_id，以表示它们属于同一个连通分量。
+  a. 将 stack 顶部的 Vertex id 出栈，然后查看邻接矩阵的相应行，如果该行的所有元素都为 0，则说明该 Vertex 是孤立的，将 visited 的相应位置标设为 component_id，然后 component_id 自增 1。如果该行含有非 0 元素，则将该行的所有非 0 位置入栈，并将 visited 的相应位置标设为 component_id，以表示它们属于同一个连通分量；
   b. 如果此时 stack 为空，则检查 visited 数组是否含有 0 元素，如果有，则将第一个 0 元素位置编号入栈，且 compoenent_id 自增 1。
 
 下面给出算法伪码：
 
 > connect_components(neighbor_matrix):
+
 > &emsp; init: visited, compoent_id, stack = [0]
+
 > &emsp; loop while stack not empty:
+
 > &emsp; &emsp; i = stack.pop()
+
 > &emsp; &emsp; isconnect = neighbor_matrix[i]
+
 > &emsp; &emsp; if isconnect all 0:
+
 > &emsp; &emsp; &emsp; visited[i] = component_id
+
 > &emsp; &emsp; &emsp; component_id += 1
+
 > &emsp; &emsp; for j in position where isconnect != 0:
+
 > &emsp; &emsp; &emsp; visited[j] = component_id
+
 > &emsp; &emsp; if stack is empty:
+
 > &emsp; &emsp; &emsp; push the first non-zero vistied index to stack
+
 > &emsp; &emsp; &emsp; component_id += 1
 
 这样一来，visited 数组就包含了每个 Vertex 属于哪个连通分量的信息，对于每一个连通分量，我们找到它所占的矩形区域，然后计算该区域的面积，根据常识来看，表格的面积比其他区域的面积要大的多，因此可以将这些大面积的矩形区域作为表格位置。以10000作为面积阈值，检测的结果如下
