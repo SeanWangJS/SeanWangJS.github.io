@@ -9,7 +9,7 @@ tags: Bert 命名实体识别
 
 ![](/resources/2021-10-21-bert-base-ner-implementation/ner_model.png)
 
-这里的 \(w_1, w_2 ..\) 等可以看作是 word id，\(t_1, t_2...\) 等可以看作是 tag id。而 NER 模型就是一个接收序列化输入的黑箱，它的结构可以是 RNN、LSTM、Transformer 以及各种 Bert。本文将分别使用 LSTM 和 Bert 来展示如何构造 NER 任务的训练框架。
+这里的 \\(w_1, w_2 ..\\) 等可以看作是 word id，\\(t_1, t_2...\\) 等可以看作是 tag id。而 NER 模型就是一个接收序列化输入的黑箱，它的结构可以是 RNN、LSTM、Transformer 以及各种 Bert。本文将分别使用 LSTM 和 Bert 来展示如何构造 NER 任务的训练框架。
 
 ##### 数据集格式说明
 
