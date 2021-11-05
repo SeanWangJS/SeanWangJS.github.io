@@ -57,31 +57,21 @@ lines = cv2.HoughLinesP(img_canny, 1, np.pi/180, 10, minLineLength=10, maxLineGa
 
 下面给出算法伪码：
 
-> connect_components(neighbor_matrix):
-
-> &emsp; init: visited, compoent_id, stack = [0]
-
-> &emsp; loop while stack not empty:
-
-> &emsp; &emsp; i = stack.pop()
-
-> &emsp; &emsp; isconnect = neighbor_matrix[i]
-
-> &emsp; &emsp; if isconnect all 0:
-
-> &emsp; &emsp; &emsp; visited[i] = component_id
-
-> &emsp; &emsp; &emsp; component_id += 1
-
-> &emsp; &emsp; for j in position where isconnect != 0:
-
-> &emsp; &emsp; &emsp; visited[j] = component_id
-
-> &emsp; &emsp; if stack is empty:
-
-> &emsp; &emsp; &emsp; push the first non-zero vistied index to stack
-
-> &emsp; &emsp; &emsp; component_id += 1
+```c
+connect_components(neighbor_matrix):
+   init: visited, compoent_id, stack = [0]
+   loop while stack not empty:
+     i = stack.pop()
+     isconnect = neighbor_matrix[i]
+     if isconnect all 0:
+       visited[i] = component_id
+       component_id += 1
+     for j in position where isconnect != 0:
+       visited[j] = component_id
+     if stack is empty:
+       push the first non-zero vistied index to stack
+       component_id += 1
+```
 
 这样一来，visited 数组就包含了每个 Vertex 属于哪个连通分量的信息，对于每一个连通分量，我们找到它所占的矩形区域，然后计算该区域的面积，根据常识来看，表格的面积比其他区域的面积要大的多，因此可以将这些大面积的矩形区域作为表格位置。以10000作为面积阈值，检测的结果如下
 
