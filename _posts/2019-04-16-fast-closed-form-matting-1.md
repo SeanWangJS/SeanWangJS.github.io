@@ -315,7 +315,7 @@ G_k = \left[
         b_j
         \end{aligned}
         \right]
-,\alpha_k = \left[
+,\bar\alpha_k = \left[
         \begin{aligned}
         \alpha_{k_1}\\
         \alpha_{k_2}\\
