@@ -43,12 +43,9 @@ lang: zh #the language of your site, eg: en(English), zh(简体中文), zh-Hans(
 ## Author & social ##
 author:
   name: seanwang
-  email:  clouswang@gmail.com
   # facebook:  #your Facebook username
   # twitter:  #your Twitter username
-  github:  SeanWangJS
   # googleplus:  #your Google+ username
-  weibo:  Sudit
   # douban:  #your Douban username
   # linkedin:  #your Linkedin username
 
