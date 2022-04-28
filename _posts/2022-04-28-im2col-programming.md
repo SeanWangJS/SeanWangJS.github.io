@@ -1,5 +1,5 @@
 ---
-title: 如何在 C++ 中使用 im2col 方法实现图像卷积运算
+title: 使用 C++ 实现 im2col 操作
 tags: im2col 卷积神经网络
 ---
 
@@ -42,7 +42,7 @@ void im2col(const float* data_im,
 
 ![](/resources/2022-04-28-im2col-programming/im2col_single-channel.png)
 
-既然选择以 data_col 作为遍历对象，那么我们就需要一个公式来计算 data_col 与 data_im 的位置对应关系，从图中可以看到 data_col 的行索引 $i$ 决定了滑动窗口（也就是卷积核）在 data_im 上停留的位置，而列索引 $j$ 则决定了元素在窗口上的位置。
+既然选择以 data_col 作为遍历对象，那么我们就需要一个公式来计算 data_col 与 data_im 的位置对应关系，从图中可以看到 data_col 的行索引 \\(i\\) 决定了滑动窗口（也就是卷积核）在 data_im 上停留的位置，而列索引 \\(j\\) 则决定了元素在窗口上的位置。
 
 根据 im2col 的输入参数，我们可以确定， 滑动窗口在 data_im 水平方向和竖直方向上的停留次数分别如下 
 
@@ -53,13 +53,13 @@ void im2col(const float* data_im,
   \end{aligned}
   \]
 
-那么 data_im 上水平方向第 x 个，竖直方向第 y 个滑动窗口与 data_col 的行索引 $i$ 的关系就如下等式
+那么 data_im 上水平方向第 x 个，竖直方向第 y 个滑动窗口与 data_col 的行索引 \\(i\\) 的关系就如下等式
 
 \[
   i = y \times win_w + x
   \]
 
-反过来，如果知晓了 $i$，那么 $x, y$ 可以用下面的代码计算
+反过来，如果知晓了 \\(i\\)，那么 \\(x, y\\) 可以用下面的代码计算
 
 ```c
 win_w = (im_w + p_w - k_w + 1) / s_w;
@@ -69,20 +69,20 @@ y = i / win_w;
 
 ![](/resources/2022-04-28-im2col-programming/im2col_kernel-map.png)
 
-另一方面，data_col 上的列索引 $j$ 与滑动窗口上第 $k_i$ 行，第 $k_j$ 列元素的位置关系如下式
+另一方面，data_col 上的列索引 \\(j\\) 与滑动窗口上第 \\(k_i\\) 行，第 \\(k_j\\) 列元素的位置关系如下式
 
 \[
   j = k_i \times k_w + k_j
   \]
 
-所以如果知晓了 $j$，则 $k_i, k_j$ 可以用下面的代码计算
+所以如果知晓了 \\(j\\)，则 \\(k_i, k_j\\) 可以用下面的代码计算
 
 ```c
 k_j = j % k_w;
 k_i = j / k_w;
 ```
 
-再通过 $x, y, k_i, k_j$，我们就能确定 data_im 上的元素位置，首先，可以得到滑动窗口左上角的元素在 data_im 上的位置为 $(y \times s_h + p_h, x\times s_w + p_w)$，然后再加上窗口内元素相对于左上角的偏移量 $k_i, k_j$，得到元素在 data_im 上的位置
+再通过 \\(x, y, k_i, k_j\\)，我们就能确定 data_im 上的元素位置，首先，可以得到滑动窗口左上角的元素在 data_im 上的位置为 \\((y \times s_h + p_h, x\times s_w + p_w)\\)，然后再加上窗口内元素相对于左上角的偏移量 \\(k_i, k_j\\)，得到元素在 data_im 上的位置
 
 ```c
 row = y * s_h + p_h + k_i;
@@ -95,13 +95,13 @@ col = x * s_w + p_w + k_j;
 data_col[i * col_w + j] = data_im[row * im_w + col];
 ```
 
-接下来，对于多通道图片，情况要稍微复杂一点，在计算 data_col 与 data_im 的位置映射关系时，除了计算行和列，还需要计算通道编号。现在我们就按照类似的思路，首先，data_im 上第 c 个通道，水平方向为 x，竖直方向为 y 的滑动窗口与 data_col 的行索引 $i$ 的关系如下式
+接下来，对于多通道图片，情况要稍微复杂一点，在计算 data_col 与 data_im 的位置映射关系时，除了计算行和列，还需要计算通道编号。现在我们就按照类似的思路，首先，data_im 上第 c 个通道，水平方向为 x，竖直方向为 y 的滑动窗口与 data_col 的行索引 \\(i\\) 的关系如下式
 
 \[
   i = c \times win_w \times win_h + y \times win_w + x
   \]
 
-于是给定 $i$，通过下面的代码计算 $c, x, y$
+于是给定 \\(i\\)，通过下面的代码计算 \\(c, x, y\\)
 
 ```c
 c = i / (win_w * win_h);
