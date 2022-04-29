@@ -46,18 +46,18 @@ void im2col(const float* data_im,
 
 根据 im2col 的输入参数，我们可以确定， 滑动窗口在 data_im 水平方向和竖直方向上的停留次数分别如下 
 
-\[
+$$
   \begin{aligned}
   win_w = \frac{im_w + p_w - k_w + 1}{s_w}\\
   win_h = \frac{im_h + p_h - k_h + 1}{s_h}
   \end{aligned}
-  \]
+  $$
 
 那么 data_im 上水平方向第 x 个，竖直方向第 y 个滑动窗口与 data_col 的行索引 \\(i\\) 的关系就如下等式
 
-\[
+$$
   i = y \times win_w + x
-  \]
+  $$
 
 反过来，如果知晓了 \\(i\\)，那么 \\(x, y\\) 可以用下面的代码计算
 
@@ -71,9 +71,9 @@ y = i / win_w;
 
 另一方面，data_col 上的列索引 \\(j\\) 与滑动窗口上第 \\(k_i\\) 行，第 \\(k_j\\) 列元素的位置关系如下式
 
-\[
+$$
   j = k_i \times k_w + k_j
-  \]
+  $$
 
 所以如果知晓了 \\(j\\)，则 \\(k_i, k_j\\) 可以用下面的代码计算
 
@@ -97,9 +97,9 @@ data_col[i * col_w + j] = data_im[row * im_w + col];
 
 接下来，对于多通道图片，情况要稍微复杂一点，在计算 data_col 与 data_im 的位置映射关系时，除了计算行和列，还需要计算通道编号。现在我们就按照类似的思路，首先，data_im 上第 c 个通道，水平方向为 x，竖直方向为 y 的滑动窗口与 data_col 的行索引 \\(i\\) 的关系如下式
 
-\[
+$$
   i = c \times win_w \times win_h + y \times win_w + x
-  \]
+  $$
 
 于是给定 \\(i\\)，通过下面的代码计算 \\(c, x, y\\)
 
