@@ -62,7 +62,7 @@ $$
 反过来，如果知晓了 \\(i\\)，那么 \\(x, y\\) 可以用下面的代码计算
 
 ```c
-win_w = (im_w + pw - kw + 1) / sw;
+win_w = (im_w + 2 * pw - kw + 1) / sw;
 x = i % win_w;
 y = i / win_w;
 ```
@@ -82,11 +82,11 @@ kj = j % kw;
 ki = j / kw;
 ```
 
-再通过 \\(x, y, k_i, k_j\\)，我们就能确定 data_im 上的元素位置，首先，可以得到滑动窗口左上角的元素在 data_im 上的位置为 \\((y \times s_h + p_h, x\times s_w + p_w)\\)，然后再加上窗口内元素相对于左上角的偏移量 \\(k_i, k_j\\)，得到元素在 data_im 上的位置
+再通过 \\(x, y, k_i, k_j\\)，我们就能确定 data_im 上的元素位置，首先，可以确定滑动窗口左上角的元素在 data_im 上的位置为 \\((y \times s_h, x\times s_w)\\)，然后再加上窗口内元素相对于左上角的偏移量 \\(k_i, k_j\\)，得到元素在 data_im 上的位置
 
 ```c
-row = y * sh + ph + ki;
-col = x * sw + pw + kj;
+row = y * sh + ki;
+col = x * sw + kj;
 ```
 
 最终我们得到单通道图片下，data_col 与 data_im 的赋值关系
@@ -125,8 +125,8 @@ k_j = (j - c * kw * kh) % kw;
 同样地，通过 \\(x, y, k_i, k_j\\) 确定元素在 data_im 每个通道上的位置
 
 ```c
-row = y * sh + ph + ki;
-col = x * sw + pw + kj;
+row = y * sh + ki;
+col = x * sw + kj;
 ```
 
 于是对于多通道图片来说，data_col 与 data_im 的位置映射关系如下
@@ -186,8 +186,8 @@ void im2col(const float* data_im,
                 int kj = j % kw;
                 int ki = j / kw;
 
-                int row = y * sh + ph + ki;
-                int col = x * sw + pw + kj;
+                int row = y * sh + ki;
+                int col = x * sw + kj;
 
                 data_col[i * col_w + j] = get_data(data_im, c, im_w, im_h, row, col, ph, pw);
             }
