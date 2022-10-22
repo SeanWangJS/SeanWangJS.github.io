@@ -110,9 +110,9 @@ $$
   \begin{aligned}
   e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
     &= v \tanh([Wh'_{j-1} + Uh_1 \quad Wh'_{j-1} + Uh_2 \quad ... \quad Wh'_{j-1} + Uh_T])\\
-    &= v \tanh(W\vec{h}'_{j-1} + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
-    &= v \tanh(W\vec{h}'_{j-1} + U[h_1 \quad h_2 \quad ... \quad h_T])\\
-    &= v \tanh(W\vec{h}'_{j-1} + UH) 
+    &= v \tanh(W h'_{j-1} + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
+    &= v \tanh(W h'_{j-1} + U[h_1 \quad h_2 \quad ... \quad h_T])\\
+    &= v \tanh(W h'_{j-1} + UH) 
   \end{aligned}
   $$
 
