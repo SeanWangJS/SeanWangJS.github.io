@@ -116,7 +116,7 @@ $$
   \end{aligned}
   $$
 
-关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 \\([h'_{j-1}]\\) 来表示 \\([{h_{j-1}'} \quad {h_{j-1}'} \quad ... \quad {h_{j-1}'}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
+关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 \\([{h'}_{j-1}]\\) 来表示 \\([{h'}_{j-1} \quad {h'}_{j-1} \quad ... \quad {h'}_{j-1}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
 
 $$
   \begin{aligned}
@@ -167,33 +167,33 @@ $$
 
 在之前的讨论中，我们使用的是 Bahdanau 原论文中的前馈网络对齐模型，但实际上，更为简单的对齐模型是直接计算两个参数向量的点积，即
 
-\[
+$$
   a(h_i, h'_{j-1}) = {h'}_{j-1}^\top h_i
-  \]
+  $$
 
 那么可以得到 
 
-\[
+$$
   \begin{aligned}
   e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}] \\
   &= [{h'}_{j-1}^\top h_1 \quad {h'}_{j-1}^\top h_2 \quad ... \quad {h'}_{j-1}^\top h_T] \\
   &= {h'}_{j-1}^\top[ h_1 \quad h_2 \quad ...\quad h_T]\\
   &= {h'}_{j-1}^\top H
   \end{aligned}
-  \]
+  $$
 
-\[
+$$
   \begin{aligned}
   \alpha &= [\alpha_1\quad \alpha_2 \quad ... \quad \alpha_{T'}]\\
   &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
   &= softmax([{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]H)\\
   &= softmax(H'H)
   \end{aligned}
-  \]
+  $$
 
-\[
+$$
   c = \alpha H^\top = softmax(H'H) H^\top
-  \]
+  $$
 
 其中 \(H' = [{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]\)
 
