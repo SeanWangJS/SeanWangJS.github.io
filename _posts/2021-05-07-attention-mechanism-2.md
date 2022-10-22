@@ -110,13 +110,14 @@ $$
   \begin{aligned}
   e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
     &= v \tanh([Wh'_{j-1} + Uh_1 \quad Wh'_{j-1} + Uh_2 \quad ... \quad Wh'_{j-1} + Uh_T])\\
-    &= v \tanh(W [h'_{j-1}] + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
-    &= v \tanh(W [h'_{j-1}] + U[h_1 \quad h_2 \quad ... \quad h_T])\\
-    &= v \tanh(W [h'_{j-1}] + UH) 
+    &= v \tanh(W \vec h'_{j-1} + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
+    &= v \tanh(W \vec h'_{j-1} + U[h_1 \quad h_2 \quad ... \quad h_T])\\
+    &= v \tanh(W \vec h'_{j-1} + UH) 
   \end{aligned}
   $$
 
-关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 \\([{h'}_{j-1}]\\) 来表示 \\([{h'}_{j-1} \quad {h'}_{j-1} \quad ... \quad {h'}_{j-1}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
+
+关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 \\(\vec h'_{j-1}\\) 来表示 \\([{h'}_{j-1} \quad {h'}_{j-1} \quad ... \quad {h'}_{j-1}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
 
 $$
   \begin{aligned}
