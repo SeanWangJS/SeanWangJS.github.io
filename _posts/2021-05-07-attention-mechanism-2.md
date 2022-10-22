@@ -78,10 +78,10 @@ $$
   e_{ji} = a(h_i, h'_{j-1})
   $$
 
-这里的 \\(e_{ji}\\) 是标量，对于每个 \\(j\\)，定义 
+这里的 \\(e_{ji}\\) 是标量，对于每个 \\(j\\)，定义 （注意这里我们默认 \\(e_j\\) 是一个列向量）
 
 $$
-  e_j = [e_{j1}\quad e_{j2} \quad ...\quad e_{jT}]
+  e_j^\top = [e_{j1}\quad e_{j2} \quad ...\quad e_{jT}]
   $$
 
 然后再对 \\(e_{j}\\) 作 softmax 归一化变换，这就是我们刚才提到的权重向量。
@@ -108,7 +108,7 @@ $$
 
 $$
   \begin{aligned}
-  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
+  e_{j}^\top &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}]\\
     &= v \tanh([Wh'_{j-1} + Uh_1 \quad Wh'_{j-1} + Uh_2 \quad ... \quad Wh'_{j-1} + Uh_T])\\
     &= v \tanh(W \vec h'_{j-1} + [Uh_1 \quad Uh_2 \quad ... \quad Uh_T])\\
     &= v \tanh(W \vec h'_{j-1} + U[h_1 \quad h_2 \quad ... \quad h_T])\\
@@ -117,23 +117,24 @@ $$
   $$
 
 
-关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 $$\vec h'_{j-1}$$ 来表示 \\([{h'}_{j-1} \quad {h'}_{j-1} \quad ... \quad {h'}_{j-1}]\\)，形状为\\(n\times T\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后是注意力向量
+关于上式有几点需要说明，第一，为了让矩阵乘法合法，必须使\\(m = T\\)；第二，上式第二个等号用到了规则\\([\tanh(a)] = \tanh([a])\\)； 第三，这里我们用 $$\vec h'_{j-1}$$ 来表示 $$[{h'}_{j-1} \quad {h'}_{j-1} \quad ... \quad {h'}_{j-1}]$$，注意它只是 $$h'_{j-1}$$ 在列方向上的重复了 \\(T\\) 次，形状为\\(n\times T\\)，另外 \\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，形状为\\(n\times T\\)。 然后再考虑注意力向量
 
 $$
   \begin{aligned}
   c_j &= \sum_{i = 1}^T \alpha_{ji} h_i \\
-  &= [\alpha_{j1}\quad \alpha_{j2} \quad ... \quad \alpha_{jT}] [h_1 \quad h_2 \quad ... \quad h_T]^\top  \\
-  &=\alpha_j H^\top
+  &= \alpha_{j1} h_1 + \alpha_{j2} h_2 +... + \alpha_{jT}h_T\\
+  &= [h_1 \quad h_2 \quad ... \quad h_T][\alpha_{j1}\quad \alpha_{j2} \quad ... \quad \alpha_{jT}]^\top  \\
+  &= H \alpha_j^\top
   \end{aligned}
   $$
 
-最后是由注意力向量组成的矩阵
+这里 \\(\alpha_j\\) 的尺寸为 \\(1\times T\\)，\\(H\\) 的尺寸为 \\(n \times T\\)，于是可知 \\(c_j\\) 的尺寸为 \\(n\times 1\\)。最后我们再考虑由注意力向量组成的矩阵
 
 $$
   \begin{aligned}
   c &= [c_1 \quad c_2 \quad ... \quad c_{T'}] \\
-  &= [\alpha_1 H^\top \quad \alpha_2 H^\top \quad ... \quad \alpha_{T'} H^\top]\\
-  & = \alpha H^\top
+  &= [H \alpha_1^\top \quad  H\alpha_2^\top \quad ... \quad  H\alpha_{T'}^\top]\\
+  & =  H\alpha
   \end{aligned}
   $$
 
@@ -141,17 +142,11 @@ $$
 
 $$
   \begin{aligned}
-  \alpha &= [\alpha_1 \quad \alpha_2 \quad ... \quad \alpha_{T'}] \\
-  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
+  \alpha &= [\alpha_1^\top \quad \alpha_2^\top \quad ... \quad \alpha_{T'}^\top] \\
+  &= softmax([e_1^\top \quad e_2^\top \quad ... \quad e_{T'}^\top])\\
   &= softmax(v \tanh([W \vec h'_0 + UH \quad W \vec h'_1 + UH \quad ... \quad W \vec h'_{T'-1} + UH ]))\\
-  &= softmax(v \tanh(W \vec{H}' + U \vec H))
+  &= softmax(v \tanh(W \mathbf{H}' + U \mathbf H))
   \end{aligned}
-  $$
-
-所以最终注意力矩阵为
-
-$$
-  c = softmax(v \tanh(W \vec{H}' + U \vec H)) H^\top
   $$
 
 这里的\\(\vec{H}'\\) 和\\(\vec{H}\\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\\)，其中
@@ -163,6 +158,14 @@ $$
 $$
   \vec{H} = [H \quad H \quad ... \quad H]
   $$
+
+
+所以最终注意力矩阵为
+
+$$
+  c = H \times softmax(v \tanh(W \vec{H}' + U \vec H))
+  $$
+
 
 ##### 考虑另一种对齐模型
 
