@@ -88,7 +88,8 @@ def postprocess(self, padded_images: torch.Tensor, feature_maps: torch.Tensor, i
   
 ```
 
-将裁剪后的特征图输入 SPP 层，输出固定维度的特征向量，即可正常向后传递。最后提一下基本的优化方法，如果在同一批次中输入图片的尺寸差异很大，会导致一些图片的填充面积过大，算是一种对计算资源的浪费，因此可以考虑尽量将高宽比接近的图片聚集到一个批次中输入，这也是 detectron2 框架中 AspectRatioGroupedDataset 的优化逻辑。
+将裁剪后的特征图输入 SPP 层，输出固定维度的特征向量，即可正常向后传递。
+
 
 
 

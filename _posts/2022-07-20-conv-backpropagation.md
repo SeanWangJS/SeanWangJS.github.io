@@ -148,3 +148,7 @@ $$
   $$
 
 最后总结一下，为了实现卷积运算的反向传播，我们只需要给出损失对输出张量的梯度，即可使用卷积和反卷积方法计算损失对输入张量和卷积核的梯度。
+
+##### 参考文章
+
+* [Convolutions and Backpropagations](https://pavisj.medium.com/convolutions-and-backpropagations-46026a8f5d2c)

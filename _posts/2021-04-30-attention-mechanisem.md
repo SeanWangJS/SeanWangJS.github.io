@@ -9,7 +9,7 @@ tags: 循环神经网络 注意力机制
 
 ![](/resources/2021-04-30-attention-mechanisem/attention_forward-network.png)
 
-如果我们简化以下，把每层节点用一个圆圈表示，则如下图
+如果我们简化一下，把每层节点用一个圆圈表示，则如下图
 
 ![](/resources/2021-04-30-attention-mechanisem/attention_forward-network-simple.png) 
 
@@ -85,7 +85,7 @@ Recurrent neural networks has been firmly established as state of the art approa
 
 也就是说利用之前被我们抛弃的 Encoder 输出值，在预测每个单词的时候将其作为额外信息加入到解码器中，并赋予一定的权重 \\(\alpha_{ij}\\)，这样的结构使得在预测每个词的时候，关联词可以占有更高的权重，即赋予更高的注意力。
 
-当然，Bahdanau 在关于 [Attention](https://arxiv.org/abs/1409.0473) 的论文中不只是这么简单的改进，但我认为上述描述是理解注意力机制比较简单的方式，接下来的工作是继续研究注意力机制在视觉任务中的作用。
+当然，Bahdanau 在关于 [Attention](https://arxiv.org/abs/1409.0473) 的论文中不只是这么简单的改进，但我认为上述描述是理解注意力机制比较简单的方式，接下来我们将更详细的讨论这一机制的演化过程。
 
 
 

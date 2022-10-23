@@ -206,7 +206,7 @@ $$
 其中 \\(H'\\) 的形状为 \\(n\times T'\\)，最后可得注意力矩阵
 
 $$
-  c = H\alpha  = Hsoftmax(H^\top H') \qquad n \times T'
+  c = H\alpha  = H \times softmax(H^\top H') \qquad n \times T'
   $$
 
 
