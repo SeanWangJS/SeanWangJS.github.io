@@ -143,33 +143,33 @@ $$
 $$
   \begin{aligned}
   \alpha &= [\alpha_1^\top \quad \alpha_2^\top \quad ... \quad \alpha_{T'}^\top] \\
-  &= softmax([e_1^\top \quad e_2^\top \quad ... \quad e_{T'}^\top])\\
+  &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
   &= softmax(v \tanh([W \vec h'_0 + UH \quad W \vec h'_1 + UH \quad ... \quad W \vec h'_{T'-1} + UH ]))\\
   &= softmax(v \tanh(W \mathbf{H}' + U \mathbf H))
   \end{aligned}
   $$
 
-这里的\\(\vec{H}'\\) 和\\(\vec{H}\\) 都是矩阵序列，尺寸均为\\(T' \times n \times T\\)，其中
+这里的\\(\mathbf{H}'\\) 和\\(\mathbf{H}\\) 都是张量，尺寸为\\(T' \times n \times T\\)，其中
 
 $$
-  \vec{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}]
+  \mathbf{H}' = [\vec{h}'_0 \quad \vec{h}'_1 \quad ... \quad \vec{h}'_{T' - 1}]
   $$
 
 $$
-  \vec{H} = [H \quad H \quad ... \quad H]
+  \mathbf{H} = [H \quad H \quad ... \quad H]
   $$
 
 
 所以最终注意力矩阵为
 
 $$
-  c = H \times softmax(v \tanh(W \vec{H}' + U \vec H))
+  c = H \times softmax(v \tanh(W \mathbf{H}' + U \mathbf H))
   $$
 
 
-##### 考虑另一种对齐模型
+##### 考虑一种简化后的对齐模型
 
-在之前的讨论中，我们使用的是 Bahdanau 原论文中的前馈网络对齐模型，但实际上，更为简单的对齐模型是直接计算两个参数向量的点积，即
+在之前的讨论中，我们使用的是 Bahdanau 原论文中的前馈网络对齐模型，但实际上，既然对齐模型是为了量化输出单词对输入单词的注意力，那更为简单的选择是直接计算两个参数向量的点积，也就是
 
 $$
   a(h_i, h'_{j-1}) = {h'}_{j-1}^\top h_i
@@ -179,27 +179,35 @@ $$
 
 $$
   \begin{aligned}
-  e_{j} &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}] \\
+  e_{j}^\top &= [e_{j1} \quad e_{j2} \quad ... \quad e_{jT}] \\
   &= [{h'}_{j-1}^\top h_1 \quad {h'}_{j-1}^\top h_2 \quad ... \quad {h'}_{j-1}^\top h_T] \\
   &= {h'}_{j-1}^\top[ h_1 \quad h_2 \quad ...\quad h_T]\\
-  &= {h'}_{j-1}^\top H
+  &= {h'}_{j-1}^\top H \qquad (1\times n) \times (n \times T)
   \end{aligned}
   $$
+
+转置一下为 
+
+$$
+e_j = H^\top {h'}_{j-1}
+$$
+
+其中 \\({h'_{j-1}}\\) 的形状为 \\(n \times 1\\)。
 
 $$
   \begin{aligned}
-  \alpha &= [\alpha_1\quad \alpha_2 \quad ... \quad \alpha_{T'}]\\
+  \alpha &= [\alpha_1^\top\quad \alpha_2^\top \quad ... \quad \alpha_{T'}^\top]\\
   &= softmax([e_1 \quad e_2 \quad ... \quad e_{T'}])\\
-  &= softmax([{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]H)\\
-  &= softmax(H'H)
+  &= softmax(H^\top[{h'}_{0}\quad {h'}_{1}\quad ... \quad {h'}_{T'-1}] )\\
+  &= softmax(H^\top H')  \qquad (T \times n) \times (n \times T')
   \end{aligned}
   $$
 
-$$
-  c = \alpha H^\top = softmax(H'H) H^\top
-  $$
+其中 \\(H'\\) 的形状为 \\(n\times T'\\)，最后可得注意力矩阵
 
-其中 \(H' = [{h'}_{0}^\top \quad {h'}_{1}^\top\quad ... \quad {h'}_{T'-1}^\top]\)
+$$
+  c = H\alpha  = Hsoftmax(H^\top H') \qquad n \times T'
+  $$
 
 
 ##### 总结
