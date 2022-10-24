@@ -61,60 +61,7 @@ $$
 
 由于我们采用了点积对齐模型，所以这种注意力模型也叫点积注意力 (Dot-Product Attention)
 
-##### 关于 Query, Key 和 Value 的解释
 
-上一节最后给出的计算图的 3 个输入矩阵都是 \\(H\\)，这是我们根据公式严格推导出来的，但是在原论文中它的 3 个输入却是 Q，K，V，这个矛盾很是让人困惑，所以这一节我们尝试来强行解释一波。首先我们把自注意力向量展开
-
-$$
-\begin{aligned}
-b_t &= \sum_{i=1}^T \alpha_{ti} h_i \\
-&= \sum_{i=1}^T \alpha_{ti} [h_{i1}\quad h_{i2} \quad ... \quad h_{in}]^\top \\
-&= \left[\sum_{i=1}^T \alpha_{ti} h_{i1}\quad \sum_{i=1}^T \alpha_{ti} h_{i2}\quad ... \quad \sum_{i=1}^T \alpha_{ti} h_{in}\right]^\top
-\end{aligned}
-$$
-
-于是对于每个分量来说有
-
-$$
-\begin{aligned}
-b_{tk} &= \sum_{i=1}^T \alpha_{ti} h_{ik}\\
-&= [h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}] [ \alpha_{t1} \quad \alpha_{t2} \quad \dots \quad \alpha_{tT}]^\top\\
-&= v_k \alpha_t^\top\\
-&= v_k \cdot softmax(e_t)\\
-&= v_k \cdot softmax(H^\top h_t)
-\end{aligned}
-$$
-
-这里我们把 \\(v_k\\) 定义为了 $$[h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}]$$。
-
-下面，让我们从另一个角度来解释上图的计算过程，首先给出 K-v pairs：
-
-$$
-  \begin{aligned}
-  K:&\quad v_k\\
-  --&--\\
-  k_1: &\quad v_{1k}\\
-  k_2: &\quad v_{2k}\\
-  ...\\
-  k_T: &\quad v_{Tk}
-  \end{aligned}
-  $$
-
-其中每个 \(k_i\)都是向量，每个 \\(v_{ik}\\) 都是标量，也就是说，每个向量对应一个标量值。现在我们有一个新的向量 $$q_t$$，也就是 query，它的长度和 \\(k_i\\) 一致，那么请问它对应的值是多少？显然，如果 query 等于向量组 keys 中的其中一个，则是能够查找出来的。但问题在于，如果 query 不在 keys 中，那么它的值就是未定义的。为了解决这一困难，一种被称为软寻址的方法被提了出来，相对于普通查找，软寻址的 query 不必在 keys 中，而是通过计算 query 与 keys 的相似度（也就是 \\(\alpha_t\\)），来合成一个值，具体的方法是，如果 query 和某个 key (\\(h_i\\)) 的相似度越高，那么与这个 key 所对应的 value (\\(h_{ik}\\)) 的权重就越大，求得所有 value 加权和就是对应于此 query 的值。
-
-可以看到，注意力值的计算其实就是一种软寻址，它的 keys 是 \\(H^\top\\)，query 是 $$h_t$$，values 是 \\(v_k\\)。如果是批量软寻址，那么 query 就是 $$H = [h_1 \quad h_2 \quad ... \quad h_T]$$，value 就是 \\(V = [v_1 \quad v_2 \quad ...\quad v_n]^\top\\)。另外不难发现，这里的 \\(H^\top\\) 和 \\(V\\) 互为转置关系。
-
-好了，现在让我们令 \\(K = H^\top, Q = H\\)，则注意力值的公式就变成了 
-
-$$
-  b = V softmax(K Q)
-  $$
-
-画出上式的计算图如下
-
-![](/resources/2021-05-20-transformer/transformer_attention-graph.png)
-
-通过对软寻址的介绍，就解析了为什么这三个输入又可以叫 \\(K, Q, V\\) 了，同样的原理也适用于自注意力的计算，这里就不赘述了。
 
 ##### Transfomer 的自注意力模块
 
@@ -138,7 +85,7 @@ $$
 
 ![](/resources/2021-05-20-transformer/transformer_encoder-decoder_with_self-attention.png)
 
-从这里就可以看出，自注意力向量在 Encoder 和 Decoder 端上都单独形成了一层，这时，RNN / LSTM 隐层单元就显得有点多余，所以最后让我们删掉 RNN / LSTM 单元，仅保留注意力结构
+从这里就可以看出，注意力向量在 Encoder 和 Decoder 端上都单独形成了一层，这时，RNN / LSTM 隐层单元就显得有点多余，所以最后让我们删掉 RNN / LSTM 单元，仅保留注意力结构
 
 ![](/resources/2021-05-20-transformer/transformer_only-attention.png)
 
@@ -156,17 +103,17 @@ $$
 
 其中 \\(X = [x_1 \quad x_2 \quad ... \quad x_T]\\)。
 
-从这里我们可以看到，去掉 RNN/LSTM 单元后，直接通过矩阵乘法就可以对输入数据进行编码，不像之前那样，首先输入 \\(x_1\\) 得到 \\(h_1\\)，然后再输入 \\(x_2\\) 才能得到 \\(h_2\\)，依次类推。顺序输入没有充分利用计算能力，而采用纯自注意力的编码器和解码器具有更高的计算效率。
+从这里我们可以看到，去掉 RNN/LSTM 单元后，直接通过矩阵乘法就可以对输入数据进行编码，不像之前那样，首先输入 \\(x_1\\) 得到 \\(h_1\\)，然后再输入 \\(x_2\\) 才能得到 \\(h_2\\)，依次类推。顺序输入没有充分利用计算能力，而采用纯注意力的编码器和解码器具有更高的计算效率。
 
-另外需要理解，从软寻址的角度来看，令 \\(V = X, K = X^\top, Q = X\\)，则有
+<!-- 另外需要理解，从软寻址的角度来看，令 \\(V = X, K = X^\top, Q = X\\)，则有
 
 $$
   b = V softmax(K Q)
-  $$
+  $$ -->
 
 ##### Mulit-Head 注意力
 
-Multi-Head 注意力是以上一节介绍的点积注意力模块为基本块而组成的，它的目的是构造多个子空间的注意力向量。所以，首先需要将输入向量映射到子空间，方法是使用全连接层映射，具体表现在乘以一个矩阵 \\(X_s = X W\\)。假设输入向量的维度为 \\(d=512\\)，需要构造 \\(h=8\\) 个子空间注意力，则每个子空间的维度为 \\(64\\)，于是矩阵 \\(W\\) 的尺寸就为 \\(512 \times 64\\)，子空间维度为 \\(64\\)，将这 8 个子空间注意力向量拼接起来又得到一个 512 维的联合注意力向量。这样一来，Multi-Head 注意力的输入和输出便和普通注意力模块的输入输出统一起来了，前者可以无缝替换后者。计算图如下所示
+Multi-Head 注意力是以上一节介绍的点积注意力模块为基本块而组成的，它的目的是构造多个子空间的注意力向量。所以，首先需要将输入向量映射到子空间，方法是使用全连接层映射，具体表现在乘以一个矩阵 \\(X_s = X W\\)。假设输入向量的维度为 \\(d=512\\)，需要构造 \\(h=8\\) 个子空间注意力，则每个子空间的维度为 \\(64\\)，于是矩阵 \\(W\\) 的形状就为 \\(512 \times 64\\)，子空间维度为 \\(64\\)，将这 8 个子空间注意力向量拼接起来又得到一个 512 维的联合注意力向量。这样一来，Multi-Head 注意力的输入和输出便和普通注意力模块的输入输出统一起来了，前者可以无缝替换后者。计算图如下所示
 
 ![](/resources/2021-05-20-transformer/transformer_multi-head-attention.png)
 
@@ -175,6 +122,59 @@ Multi-Head 注意力是以上一节介绍的点积注意力模块为基本块而
 ![](/resources/2021-05-20-transformer/transformer_multi-head-attention2.png)
 
 因为涉及到多个子空间的注意力向量计算，每个子空间的计算图就是一个 Head，所以这种方法就叫 Multi-Head Attention。
+
+值得注意的是，通过不同的权重矩阵映射后，输入到 Dot-Production Attention 层的 3 个矩阵不再是同一个矩阵了，也就是说我们前面一直在说的注意力公式 
+$$
+  b = H \cdot softmax(H^\top H)
+  $$
+
+不再具有普遍意义，为此我们可以将其改写为
+$$
+b = V \cdot softmax(K Q)
+$$
+
+##### 关于 Query, Key 和 Value 的解释
+
+下面我们稍微解释一下为什么注意力计算的三个输入分别代表 Query，Key 和 Value。首先我们把自注意力向量展开
+
+$$
+\begin{aligned}
+b_t &= \sum_{i=1}^T \alpha_{ti} h_i \\
+&= \sum_{i=1}^T \alpha_{ti} [h_{i1}\quad h_{i2} \quad ... \quad h_{in}]^\top \\
+&= \left[\sum_{i=1}^T \alpha_{ti} h_{i1}\quad \sum_{i=1}^T \alpha_{ti} h_{i2}\quad ... \quad \sum_{i=1}^T \alpha_{ti} h_{in}\right]^\top
+\end{aligned}
+$$
+
+于是对于每个分量来说有
+
+$$
+\begin{aligned}
+b_{tk} &= \sum_{i=1}^T \alpha_{ti} h_{ik}\\
+&= [h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}] [ \alpha_{t1} \quad \alpha_{t2} \quad \dots \quad \alpha_{tT}]^\top\\
+&= v_k \alpha_t^\top\\
+&= v_k \cdot softmax(e_t)\\
+&= v_k \cdot softmax(H^\top h_t)
+\end{aligned}
+$$
+
+这里我们把 \\(v_k\\) 定义成了 $$[h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}]$$。
+
+下面，让我们从另一个角度来解释上式的计算过程，首先给出 K-v pairs：
+
+$$
+  \begin{aligned}
+  K:&\quad v_k\\
+  --&--\\
+  k_1: &\quad v_{1k}\\
+  k_2: &\quad v_{2k}\\
+  ...\\
+  k_T: &\quad v_{Tk}
+  \end{aligned}
+  $$
+
+其中每个 \(k_i\)都是向量，每个 \\(v_{ik}\\) 都是标量，也就是说，每个向量对应一个标量值。现在我们有一个新的向量 $$q_t$$，也就是 query，它的长度和 \\(k_i\\) 一致，那么请问它对应的值是多少？显然，如果 query 等于向量组 keys 中的其中一个，则是能够查找出来的。但问题在于，如果 query 不在 keys 中，那么它的值就是未定义的。为了解决这一困难，一种被称为软寻址的方法被提了出来，相对于普通查找，软寻址的 query 不必在 keys 中，而是通过计算 query 与 keys 的相似度（也就是 \\(\alpha_t\\)），来合成一个值，具体的方法是，如果 query 和某个 key (\\(k_i\\)) 的相似度越高，那么与这个 key 所对应的 value (\\(v_{ik}\\)) 的权重就越大，把所有权重算出来，再对 values 加权求和就是对应于此 query 的值。
+
+可以看到，注意力值的计算其实就是一种软寻址，它的 keys 是 \\(H^\top\\)，query 是 $$h_t$$，values 是 \\(v_k\\)。如果是批量软寻址，那么 query 就是 $$H = [h_1 \quad h_2 \quad ... \quad h_T]$$，value 就是 \\(V = [v_1 \quad v_2 \quad ...\quad v_n]^\top\\)。另外不难发现，这里的 \\(H^\top\\) 和 \\(V\\) 互为转置关系。
 
 ##### Transformer 的 Encoder-Decoder 结构
 
