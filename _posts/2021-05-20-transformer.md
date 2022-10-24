@@ -15,49 +15,47 @@ tags: 深度学习 注意力机制 Transformer
 
 ![](/resources/2021-05-20-transformer/transformer_encoder-decoder_self-attention.png)
 
-同之前的叙述类似，其计算公式为
+在前文的讨论中，我们已经知道了输入输出之间的注意力的计算公式为
+
+$$
+  c_j = \sum_{i=1}^T \alpha_{ji} h_i = H \alpha_j^\top
+  $$
+
+也就是隐层的加权平均，这里的 \\(\alpha_i\\) 代表了输入输出间的注意力权重。那么自注意力的计算也可以写成同样的形式
+
+$$
+b_j = \sum_{i=1}^T \alpha_{ji} h_i = H \alpha_j^\top
+$$
+
+只不过此时 \\(\alpha_i\\) 代表的是输入单元之间的注意力权重，它的计算形式为
+
+$$
+  \alpha_j^\top =softmax(e_j)
+  $$
+
+其中 
 
 $$
   \begin{aligned}
-  b_s &= \sum_{i=1}^T \alpha_{si} h_i = H \alpha_s   \\
-  \alpha_{j} &= softmax(e_j)\\
-  e_{ji} &= a(h_j, h_i)
+  e_j^\top &= [e_{j1}\quad e_{j2}\quad \dots\quad e_{jT}]\\
+  &= [h_j^\top h_1\quad h_j^\top h_2\quad \dots\quad h_j^\top h_T]\\
+  &= h_j^\top H
   \end{aligned}
   $$
 
-其中 \\(H = [h_1 \quad h_2 ... \quad h_T]\\)，尺寸为 \\(n\times T\\)， \\(\alpha_s\\) 为权重向量，尺寸为 \\(T \times 1\\)，\\(a\\) 为对齐模型，假设它的形式为两个向量参数的点积，即 \\(a(h_j, h_i) = h_i^\top h_j\\)，则有
+而这里的 \\(e_ji\\) 就是对齐函数，我们可以把它定义为向量点积形式
 
 $$
-  e_j = \left[
-    \begin{aligned}
-    e_{j1}\\e_{j2}\\\vdots\\e_{jT}
-    \end{aligned}
-    \right]
-    = \left[
-    \begin{aligned}
-    h_1^\top h_j\\h_2^\top h_j\\\vdots\\ h_T^\top h_j
-    \end{aligned}
-    \right]
-    = \left[
-    \begin{aligned}
-    h_1^\top\\h_2^\top\\\vdots\\ h_T^\top 
-    \end{aligned}
-    \right]h_j = H^\top h_j
+  e_{ji} = h_j^\top h_i
   $$
 
-那么自注意力值的矩阵形式就为
+经过一通代入后，可以得到自注意力的矩阵计算形式
 
 $$
-  \begin{aligned}
-  b &= [b_1 \quad b_2 \quad ... \quad b_T] \\
-    &= H [\alpha_1 \quad \alpha_2 \quad ... \quad \alpha_T]\\
-    &= H softmax([e_1 \quad e_2 \quad ... \quad e_T] )\\
-    &= H softmax( H^\top[h_1 \quad h_2 \quad ... \quad h_T])\\ 
-    &= H softmax(H^\top H)
-  \end{aligned}
-  $$
+b = H \cdot softmax(H^\top H)
+$$
 
-上式的计算图如下
+计算图如下
 
 ![](/resources/2021-05-20-transformer/transformer_self-attention.png)
 
@@ -65,67 +63,51 @@ $$
 
 ##### 关于 Query, Key 和 Value 的解释
 
-上一节最后给出的计算图的 3 个输入矩阵都是 \\(H\\)，这是我们根据公式严格推导出来的，但是在原论文中它的 3 个输入却是 Q，K，V，这个矛盾很是让人困惑，所以这一节我们尝试来强行解释一波。首先，我们回到 Encoder 和 Decoder 之间的注意力公式
+上一节最后给出的计算图的 3 个输入矩阵都是 \\(H\\)，这是我们根据公式严格推导出来的，但是在原论文中它的 3 个输入却是 Q，K，V，这个矛盾很是让人困惑，所以这一节我们尝试来强行解释一波。首先我们把自注意力向量展开
 
 $$
-  c_t =\sum_{i=1}^T \alpha_{ti} h_i 
-  = \alpha_{t1} \left[\begin{aligned}
-  h_{11} \\h_{12}\\... \\h_{1n}
-  \end{aligned}\right]  +
-  \alpha_{t2} \left[\begin{aligned}
-  h_{21} \\h_{22}\\... \\h_{2n}
-  \end{aligned}\right] +...+
-  \alpha_{tT} \left[\begin{aligned}
-  h_{T1} \\h_{T2}\\... \\h_{Tn}
-  \end{aligned}\right]  
-  = \left[
-    \begin{aligned}
-    \sum_{i = 1}^T \alpha_{ti} h_{i1}\\\sum_{i = 1}^T \alpha_{ti} h_{i2}\\...\\\sum_{i = 1}^T \alpha_{ti} h_{in}
-    \end{aligned}
-    \right]
-  $$
+\begin{aligned}
+b_t &= \sum_{i=1}^T \alpha_{ti} h_i \\
+&= \sum_{i=1}^T \alpha_{ti} [h_{i1}\quad h_{i2} \quad ... \quad h_{in}]^\top \\
+&= \left[\sum_{i=1}^T \alpha_{ti} h_{i1}\quad \sum_{i=1}^T \alpha_{ti} h_{i2}\quad ... \quad \sum_{i=1}^T \alpha_{ti} h_{in}\right]^\top
+\end{aligned}
+$$
 
-这里的 \\(c_t\\) 是一个向量，它的每个元素
+于是对于每个分量来说有
 
 $$
-  c_{tk} = \sum_{i=1}^T \alpha_{ti}h_{ik}
-  $$
+\begin{aligned}
+b_{tk} &= \sum_{i=1}^T \alpha_{ti} h_{ik}\\
+&= [h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}] [ \alpha_{t1} \quad \alpha_{t2} \quad \dots \quad \alpha_{tT}]^\top\\
+&= v_k \alpha_t^\top\\
+&= v_k \cdot softmax(e_t)\\
+&= v_k \cdot softmax(H^\top h_t)
+\end{aligned}
+$$
 
-用图形表示如下
+这里我们把 \\(v_k\\) 定义为了 $$[h_{1k} \quad h_{2k} \quad \dots \quad h_{Tk}]$$。
 
-![](/resources/2021-05-20-transformer/transformer_q-k-v.png)
-
-由于前面已经用符号 \\(h_{i}\\) 来表示向量 \\([h_{11}\quad h_{12} \quad ...\quad h_{1n}]^\top\\)，所以下面我们使用符号 \\(v_k\\) 来表示向量 \\([h_{1k} \quad h_{2k} \quad ... \quad h_{Tk}]\\)。于是 
+下面，让我们从另一个角度来解释上图的计算过程，首先给出 K-v pairs：
 
 $$
   \begin{aligned}
-  c_{tk} &= v_k\alpha_{t}\\
-  &=v_k [\alpha_{t1} \quad \alpha_{t2} \quad ...\quad \alpha_{tT}]^\top\\
-  &=v_k softmax({h'}_{t-1}^\top [h_1\quad h_2 \quad ... \quad h_{T}])^\top\\
-  &=v_k softmax(H^\top h'_{t-1})
-  \end{aligned}
-  $$
-
-其中对齐模型采用点积模型，即 \\(e_{ti} = {h'}_{t-1}^\top h_i\\)，\\(H = [h_1 \quad h_2 \quad ... \quad h_T]\\)，尺寸为 \\(n\times T\\)。下面，让我们从另一个角度来解释上图的计算过程，首先假设 K-V pairs：
-
-$$
-  \begin{aligned}
-  K:&\quad V\\
-  h_1: &\quad h_{1k}\\
-  h_2: &\quad h_{2k}\\
+  K:&\quad v_k\\
+  --&--\\
+  k_1: &\quad v_{1k}\\
+  k_2: &\quad v_{2k}\\
   ...\\
-  h_T: &\quad h_{Tk}
+  k_T: &\quad v_{Tk}
   \end{aligned}
   $$
 
-也就是说，每个向量 \\(h_{i}\\) 对应一个标量值 \\(h_{ik}\\)。现在我们有一个向量 $${h'}_{t-1}$$，也被称为  query，请问它对应的值是多少？显然，如果 query 等于向量组 keys 中的其中一个，那么是能够查找出来的。但问题在于，如果 query 不在 keys 中，那么它的值就是未定义的。为了解决这一困难，一种被称为软寻址的方法被提了出来，相对于普通查找，软寻址的 query 不必在 keys 中，而是通过计算 query 与 keys 的相似度（也就是 \\(\alpha_t\\)），来合成一个值，具体的方法是，如果 query 和某个 key (\\(h_i\\)) 的相似度越高，那么与这个 key 所对应的 value (\\(h_{ik}\\)) 的权重就越大，求得所有 value 加权和就是对应于此 query 的值。
+其中每个 \(k_i\)都是向量，每个 \\(v_{ik}\\) 都是标量，也就是说，每个向量对应一个标量值。现在我们有一个新的向量 $$q_t$$，也就是 query，它的长度和 \\(k_i\\) 一致，那么请问它对应的值是多少？显然，如果 query 等于向量组 keys 中的其中一个，则是能够查找出来的。但问题在于，如果 query 不在 keys 中，那么它的值就是未定义的。为了解决这一困难，一种被称为软寻址的方法被提了出来，相对于普通查找，软寻址的 query 不必在 keys 中，而是通过计算 query 与 keys 的相似度（也就是 \\(\alpha_t\\)），来合成一个值，具体的方法是，如果 query 和某个 key (\\(h_i\\)) 的相似度越高，那么与这个 key 所对应的 value (\\(h_{ik}\\)) 的权重就越大，求得所有 value 加权和就是对应于此 query 的值。
 
-可以看到，注意力值的计算其实就是一种软寻址，它的 keys 是 \\(H^\top\\)，query 是 $$h'_{t-1}$$，values 是 \\(v_k\\)。如果是批量软寻址，那么 query 就是 $$H' = [h'_0 \quad h'_1 \quad ... \quad h'_{T'-1}]$$，value 就是 \\(V = [v_1 \quad v_2 \quad ...\quad v_n]^\top\\)。另外不难发现，这里的 \\(H^\top\\) 和 \\(V\\) 互为转置关系。
+可以看到，注意力值的计算其实就是一种软寻址，它的 keys 是 \\(H^\top\\)，query 是 $$h_t$$，values 是 \\(v_k\\)。如果是批量软寻址，那么 query 就是 $$H = [h_1 \quad h_2 \quad ... \quad h_T]$$，value 就是 \\(V = [v_1 \quad v_2 \quad ...\quad v_n]^\top\\)。另外不难发现，这里的 \\(H^\top\\) 和 \\(V\\) 互为转置关系。
 
-好了，现在让我们令 \\(K = H^\top, Q = H'\\)，则注意力值的公式就变成了 
+好了，现在让我们令 \\(K = H^\top, Q = H\\)，则注意力值的公式就变成了 
 
 $$
-  c = V softmax(K Q)
+  b = V softmax(K Q)
   $$
 
 画出上式的计算图如下
