@@ -117,9 +117,9 @@ $$
 \end{matrix}
 \right] = \left[
   \begin{aligned}
-  \frac{\partial L}{\partial k_{11}} \\
-  \frac{\partial L}{\partial k_{12}} \\
-  \frac{\partial L}{\partial k_{21}} \\
+  \frac{\partial L}{\partial k_{11}} \quad
+  \frac{\partial L}{\partial k_{12}} \quad
+  \frac{\partial L}{\partial k_{21}} \quad
   \frac{\partial L}{\partial k_{22}}
   \end{aligned}
 \right]
@@ -199,9 +199,9 @@ $$
 
 再观察公式(2)，可以发现，将公式(3)的结果按 `im2col` 的逆过程折叠，折叠到相同位置的元素相加，即可得到 \\(\frac{\partial K}{\partial X}\\)，也就是说
 
-\[
+$$
   \frac{\partial L}{\partial X} = \mathbf{col2im}\left(\frac{\partial L}{\partial Y} \cdot K\right)
-  \]
+  $$
 
 最后总结一下，为了实现卷积运算的反向传播，我们只需要给出损失对输出张量的梯度，即可使用矩阵乘法配合 `im2col` 和 `col2im` 计算损失对输入张量和卷积核的梯度。
 
