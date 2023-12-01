@@ -1,5 +1,5 @@
 ---
-title: 编程入门（7）：并行 Reduction 及其 kernel 优化技术
+title: CUDA 编程入门（7）：并行 Reduction 及其 kernel 优化技术
 tags: CUDA 并行计算
 ---
 
