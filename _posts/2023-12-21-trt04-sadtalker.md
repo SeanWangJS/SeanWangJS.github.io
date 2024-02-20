@@ -1,5 +1,6 @@
 ---
 title: TensorRT 使用指南（4）：SadTalker 模型加速方案
+tags: TensorRT
 ---
 
 ## 介绍
