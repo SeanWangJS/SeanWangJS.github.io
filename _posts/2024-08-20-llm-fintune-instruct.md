@@ -202,7 +202,7 @@ $$
 显然，为了获得最佳的语言模型参数，我们需要最大化似然函数，即
 
 $$
-\theta^{best} = \argmax_{\theta} \mathcal{L}(\theta)
+\theta^{best} = \arg \max_{\theta} \mathcal{L}(\theta)
 $$
 
 而为了简化计算，我们通常会取似然函数的对数形式，即
