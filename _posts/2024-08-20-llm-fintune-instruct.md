@@ -267,17 +267,6 @@ class ChatMlSpecialTokens:
     def assistant(self):
         return f"{self.bos_token}assistant"
 
-    @property
-    def chat_template(self):
-        return (
-            "{% for message in messages %}"
-            f"{{{{'{self.bos_token}' + message['role'] + '\n' + message['content'] + '{self.eos_token}' + '\n'}}}}"
-            "{% endfor %}"
-            "{% if add_generation_prompt %}"
-            f"{{{{ '{self.assistant}\n' }}}}"
-            "{% endif %}"
-        )
-
 ```
 
 
