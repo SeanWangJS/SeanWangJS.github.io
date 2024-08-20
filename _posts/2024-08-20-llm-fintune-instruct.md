@@ -324,7 +324,6 @@ def setup_chat_format(
     return model, tokenizer
 ```
 
-这里的 `ChatMlSpecialTokens` 就是 huggingface 推荐的通用 chat_format。使用 `setup_chat_format` 函数可以对模型和 tokenizer 进行统一修改，主要就是为 tokenizer 添加了两个特殊的 token，即 `<|im_start|>` 和 `<|im_end|>`，对应的需要增加模型的 embedding layer 大小。其中 `resize_to_multiple_of` 参数来自于 karpathy 的一个想法，他提到可以把模型的 embedding layer 大小调整到 64 的倍数，这样可以提高计算效率，我们暂时先不管这个，感兴趣的同学可以研究研究。
 
 ## 参考链接
 
