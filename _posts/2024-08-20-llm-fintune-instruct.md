@@ -241,7 +241,44 @@ print(F.nll_loss(torch.log(probs.view(-1, 100)), labels.view(-1)))
 
 在近期版本的 transformers 框架中，为了解决不同模型的指令格式不同的问题，统一为模型提供了 `apply_chat_format` 接口，可以将对话内容格式化到模型能识别的指令形式。由于 GPT2 模型没有经过指令微调，所以我们需要自己设置一个 chat_format，这里借鉴 trl 框架的 https://github.com/huggingface/trl/blob/main/trl/models/utils.py 文件中的代码并进行简化
 
+```python
+from typing import Tuple
+from dataclasses import dataclass
 
+from transformers import PreTrainedModel, PreTrainedTokenizer
+
+@dataclass
+class ChatMlSpecialTokens:
+    """Dataclass for special tokens used in ChatML, including system, user, assistant, bos, eos, and pad tokens."""
+
+    bos_token: str = "<|im_start|>"
+    eos_token: str = "<|im_end|>"
+    pad_token: str = "<|im_end|>"
+
+    @property
+    def system(self):
+        return f"{self.bos_token}system"
+
+    @property
+    def user(self):
+        return f"{self.bos_token}user"
+
+    @property
+    def assistant(self):
+        return f"{self.bos_token}assistant"
+
+    @property
+    def chat_template(self):
+        return (
+            "{% for message in messages %}"
+            f"{{{{'{self.bos_token}' + message['role'] + '\n' + message['content'] + '{self.eos_token}' + '\n'}}}}"
+            "{% endfor %}"
+            "{% if add_generation_prompt %}"
+            f"{{{{ '{self.assistant}\n' }}}}"
+            "{% endif %}"
+        )
+
+```
 
 
 ## 参考链接
