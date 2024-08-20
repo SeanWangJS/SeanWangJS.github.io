@@ -233,6 +233,98 @@ print(F.cross_entropy(logits.view(-1, 100), labels.view(-1)))
 print(F.nll_loss(torch.log(probs.view(-1, 100)), labels.view(-1)))
 ```
 
+## 代码实现
+
+接下来我们以 GPT2 为例，使用 alpaca 数据集进行指令微调，让原本只能进行文本补全的 GPT2 模型具备回答问题的能力。之所以选择 GPT2 是因为，首先它是一个比较小巧的模型，最小的版本只有 270M 参数，可以在一般的笔记本上训练，另外它的预训练模型没有指令模板，方便展示对其赋予指令理解能力的过程。
+
+### 设置 chat_format
+
+在近期版本的 transformers 框架中，为了解决不同模型的指令格式不同的问题，统一为模型提供了 `apply_chat_format` 接口，可以将对话内容格式化到模型能识别的指令形式。由于 GPT2 模型没有经过指令微调，所以我们需要自己设置一个 chat_format，这里借鉴 trl 框架的 https://github.com/huggingface/trl/blob/main/trl/models/utils.py 文件中的代码并进行简化
+
+```python
+from typing import Tuple
+from dataclasses import dataclass
+
+from transformers import PreTrainedModel, PreTrainedTokenizer
+
+@dataclass
+class ChatMlSpecialTokens:
+    """Dataclass for special tokens used in ChatML, including system, user, assistant, bos, eos, and pad tokens."""
+
+    bos_token: str = "<|im_start|>"
+    eos_token: str = "<|im_end|>"
+    pad_token: str = "<|im_end|>"
+
+    @property
+    def system(self):
+        return f"{self.bos_token}system"
+
+    @property
+    def user(self):
+        return f"{self.bos_token}user"
+
+    @property
+    def assistant(self):
+        return f"{self.bos_token}assistant"
+
+    @property
+    def chat_template(self):
+        return (
+            "{% for message in messages %}"
+            f"{{{{'{self.bos_token}' + message['role'] + '\n' + message['content'] + '{self.eos_token}' + '\n'}}}}"
+            "{% endfor %}"
+            "{% if add_generation_prompt %}"
+            f"{{{{ '{self.assistant}\n' }}}}"
+            "{% endif %}"
+        )
+
+
+def setup_chat_format(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    resize_to_multiple_of: int = None,
+) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
+    """
+    Setup chat format by adding special tokens to the tokenizer, setting the correct format, and extending the embedding layer of the model based on the new special tokens.
+
+    Args:
+      model (`~transformers.PreTrainedModel`): The model to be modified.
+      tokenizer (`~transformers.PreTrainedTokenizer`): The tokenizer to be modified.
+    Returns:
+      model (`~transformers.PreTrainedModel`): The modified model.
+      tokenizer (`~transformers.PreTrainedTokenizer`): The modified tokenizer.
+    """
+    # check if format available and retrieve
+
+    chat_format = ChatMlSpecialTokens()
+
+    # set special tokens and them
+    tokenizer.eos_token = chat_format.eos_token
+    tokenizer.pad_token = chat_format.pad_token
+    tokenizer.bos_token = chat_format.bos_token
+    tokenizer.add_special_tokens({"additional_special_tokens": [chat_format.bos_token, chat_format.eos_token]})
+    # set chat format for tokenizer
+    tokenizer.chat_template = chat_format.chat_template
+
+    # resize embedding layer to a multiple of 64, https://x.com/karpathy/status/1621578354024677377
+    model.resize_token_embeddings(
+        len(tokenizer), pad_to_multiple_of=resize_to_multiple_of if resize_to_multiple_of is not None else None
+    )
+    # Update the model config to use the new eos & bos tokens
+    if getattr(model, "config", None) is not None:
+        model.config.pad_token_id = tokenizer.pad_token_id
+        model.config.bos_token_id = tokenizer.bos_token_id
+        model.config.eos_token_id = tokenizer.eos_token_id
+    # Update the generation config to use the new eos & bos token
+    if getattr(model, "generation_config", None) is not None:
+        model.generation_config.bos_token_id = tokenizer.bos_token_id
+        model.generation_config.eos_token_id = tokenizer.eos_token_id
+        model.generation_config.pad_token_id = tokenizer.pad_token_id
+
+    return model, tokenizer
+```
+
+这里的 `ChatMlSpecialTokens` 就是 huggingface 推荐的通用 chat_format。使用 `setup_chat_format` 函数可以对模型和 tokenizer 进行统一修改，主要就是为 tokenizer 添加了两个特殊的 token，即 `<|im_start|>` 和 `<|im_end|>`，对应的需要增加模型的 embedding layer 大小。其中 `resize_to_multiple_of` 参数来自于 karpathy 的一个想法，他提到可以把模型的 embedding layer 大小调整到 64 的倍数，这样可以提高计算效率，我们暂时先不管这个，感兴趣的同学可以研究研究。
 
 ## 参考链接
 
