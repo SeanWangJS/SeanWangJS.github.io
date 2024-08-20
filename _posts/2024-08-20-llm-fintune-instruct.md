@@ -642,7 +642,7 @@ if __name__ == "__main__":
 上图展示了三种数据处理方式的验证集损失曲线，可以看到，从指标上来看，使用 padding 和 concat 模式的效果类似，而 packed 模式的最终损失函数要稍微大一点，这也比较符合我们的预期。
 
 然后我们再使用训练集中的数据对模型进行测试，比较三种数据处理方式的效果，以下为提示词
-
+<!-- 
 ```
 <|im_start|>user
 Below is an instruction that describes a task. Write a response that appropriately completes the request.
@@ -673,7 +673,7 @@ Can you tell me the history of Earth<|im_end|>
 |---|---|---|
 |The Earth is a large, rotating body of water that is formed by the rotation of the Earth's axis. It is the largest planet in the solar system and is the only one that orbits the Sun. It is the only planet in the solar system that has a temperature of around -40°C (212°F).\n\nThe Earth's rotation is caused by the rotation of the Earth's axis, which is caused by the force of gravity. The Earth's rotation is caused by the force of gravity, which is the force of attraction between two objects. The Earth's rotation is caused by the rotation of the Earth's surface, which is caused by the force of gravity. The Earth's rotation is caused by the force of gravity, which is the force of attraction between two objects.|The Earth is a large, rotating body of water that is formed by the rotation of the Earth's axis. It is the largest planet in the solar system and is the only one that orbits the Sun. The Earth's rotation is known as the Earth's rotation, and it is the longest known cycle in the solar system.\n\nThe Earth's rotation is caused by the rotation of the Earth's axis, which is the force that pulls the Earth's rotation around the Sun. The Earth's rotation is caused by the rotation of the Earth's surface, which is the force that pulls the Earth's surface towards the Sun. The Earth's rotation is caused by the rotation of the Earth's atmosphere, which is the pressure that keeps the Earth's surface warm.\n\nThe Earth's rotation is caused by the rotation of the Earth's magnetic field, which is the force that pulls the Earth's magnetic field towards the Sun. The Earth's rotation is caused by the rotation of the Earth's magnetic field, which is the force that pulls the Earth's magnetic|The Earth is a large, flat, and spherical planet with a diameter of approximately 4.5 billion kilometers. It is the largest planet in the solar system and is the only one that has a solid core. The Earth is the only planet in the solar system that has a liquid core, and its temperature is about the same as that of the sun.\n\nThe Earth is the only planet in the solar system that has a liquid core, and its temperature is about the same as that of the sun.|
 
-虽然大量事实性错误很难崩，但是可以看到模型同样遵循了我们的指令。
+虽然大量事实性错误很难崩，但是可以看到模型同样遵循了我们的指令。 -->
 
 总结一下，通过指令微调，我们使 GPT2 的预训练模型可以实现对话形式的生成任务，在微调过程中发现三种数据集的处理方式产生的结果差异不是很大，可能需要更多的实验来验证这一点。
 
