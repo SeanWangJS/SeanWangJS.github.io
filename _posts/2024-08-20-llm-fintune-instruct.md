@@ -219,7 +219,7 @@ $$
 H(\eta, \xi) = \lim_{n \to \infty} -\frac{1}{n} \sum_{i=1}^n \log p_{\xi}(X_{i} \mid X_{\lt i})
 $$
 
-可以看到上述交叉熵的公式与负对数似然函数只差了一个系数 $\frac 1 n$，原因在于交叉熵在整个样本集上取得平均，而我们推导的负对数似然函数只是针对单个样本的，所以两者实际上是等价的。但值得注意的是，在 PyTorch 实现中，`torch.nn.functional` 模块下的 `cross_entroy` 和 `nll_loss` 这两个函数，`cross_entropy` 会自动对输入进行 softmax 操作，而 `nll_loss` 不会，也就是说 `cross_entroy` 的输入是未归一化的 logits，而 `nll_loss` 的输入是已经归一化的概率分布。下面这个例子应该能说明情况
+可以看到上述交叉熵的公式与负对数似然函数只差了一个系数 $ \frac 1 n $，原因在于交叉熵在整个样本集上取得平均，而我们推导的负对数似然函数只是针对单个样本的，所以两者实际上是等价的。但值得注意的是，在 PyTorch 实现中，`torch.nn.functional` 模块下的 `cross_entroy` 和 `nll_loss` 这两个函数，`cross_entropy` 会自动对输入进行 softmax 操作，而 `nll_loss` 不会，也就是说 `cross_entroy` 的输入是未归一化的 logits，而 `nll_loss` 的输入是已经归一化的概率分布。下面这个例子应该能说明情况
 
 ```python
 import torch
@@ -643,7 +643,22 @@ Can you tell me the history of Earth<|im_end|>
 |---|---|---|
 |The Earth is a large, rotating body of water that is formed by the rotation of the Earth's axis. It is the largest planet in the solar system and is the only one that orbits the Sun. It is the only planet in the solar system that has a temperature of around -40°C (212°F).\n\nThe Earth's rotation is caused by the rotation of the Earth's axis, which is caused by the force of gravity. The Earth's rotation is caused by the force of gravity, which is the force of attraction between two objects. The Earth's rotation is caused by the rotation of the Earth's surface, which is caused by the force of gravity. The Earth's rotation is caused by the force of gravity, which is the force of attraction between two objects.|The Earth is a large, rotating body of water that is formed by the rotation of the Earth's axis. It is the largest planet in the solar system and is the only one that orbits the Sun. The Earth's rotation is known as the Earth's rotation, and it is the longest known cycle in the solar system.\n\nThe Earth's rotation is caused by the rotation of the Earth's axis, which is the force that pulls the Earth's rotation around the Sun. The Earth's rotation is caused by the rotation of the Earth's surface, which is the force that pulls the Earth's surface towards the Sun. The Earth's rotation is caused by the rotation of the Earth's atmosphere, which is the pressure that keeps the Earth's surface warm.\n\nThe Earth's rotation is caused by the rotation of the Earth's magnetic field, which is the force that pulls the Earth's magnetic field towards the Sun. The Earth's rotation is caused by the rotation of the Earth's magnetic field, which is the force that pulls the Earth's magnetic|The Earth is a large, flat, and spherical planet with a diameter of approximately 4.5 billion kilometers. It is the largest planet in the solar system and is the only one that has a solid core. The Earth is the only planet in the solar system that has a liquid core, and its temperature is about the same as that of the sun.\n\nThe Earth is the only planet in the solar system that has a liquid core, and its temperature is about the same as that of the sun.|
 
-虽然大量事实性错误很难崩，但是可以看到模型同样遵循了我们的指令。
+虽然大量事实性错误很难崩，但是可以看到模型同样遵循了我们的指令。最后我们再使用 [lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) 框架评估模型在 hellaswag 数据集上的指标，检查指令微调是否把模型原本的能力破坏了。
+
+```shell
+lm-eval --model hf --model_args pretrained=./sft/gpt2-padding-best --task hellaswag
+```
+
+结果如下
+
+|model|hellaswag/acc_norm|
+|---|---|
+|gpt2|0.3114|
+|padding|0.3125|
+|concat|0.3116|
+|packed|0.3138|
+
+可以看到，本次微调没有破坏模型原有的能力，甚至还有提升，说明我们的微调是有效的。
 
 总结一下，通过指令微调，我们使 GPT2 的预训练模型可以实现对话形式的生成任务，在微调过程中发现三种数据集的处理方式产生的结果差异不是很大，可能需要更多的实验来验证这一点。
 
